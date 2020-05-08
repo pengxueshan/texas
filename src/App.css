@@ -36,3 +36,20 @@
     transform: rotate(360deg);
   }
 }
+
+.btn-wrap {
+  text-align: right;
+  padding: 20px;
+}
+
+.btn-wrap > button {
+  margin-left: 20px;
+}
+
+.add-round-wrap {
+  padding: 20px 0;
+}
+
+.details-round-wrap {
+  padding: 20px 0;
+}
