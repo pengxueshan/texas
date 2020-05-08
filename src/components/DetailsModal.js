@@ -1,15 +1,9 @@
 import React, { Component } from 'react';
 import { Modal, Table } from 'antd';
 import AppContext from '../store/context';
-import AV from 'leancloud-storage';
 
 export default class DetailsModal extends Component {
   static contextType = AppContext;
-
-  state = {
-    list: [],
-    roundInfos: [],
-  };
 
   getTableColumns() {
     let ret = [
@@ -54,7 +48,8 @@ export default class DetailsModal extends Component {
   }
 
   getUserRoundInfo = (userId, index) => {
-    let list = this.state.roundInfos[index];
+    let { roundUserInfo } = this.context;
+    let list = roundUserInfo[index];
     if (list) {
       let info = list.find((item) => {
         return item.get('player').get('objectId') === userId;
@@ -64,40 +59,8 @@ export default class DetailsModal extends Component {
     return '';
   };
 
-  getAllRounds = () => {
-    const rounds = new AV.Query('Round');
-    rounds.find().then((res) => {
-      Promise.all(
-        res.map((round) => {
-          return this.getRoundInfo(round);
-        })
-      ).then((roundInfos) => {
-        this.setState({
-          list: res,
-          roundInfos,
-        });
-      });
-    });
-  };
-
-  getRoundInfo = (round) => {
-    const query = new AV.Query('RoundUserInfo');
-    query.equalTo('round', round);
-    return query.find();
-  };
-
-  componentDidMount() {
-    console.log('did mount');
-    this.getAllRounds();
-  }
-
-  componentDidUpdate(prevProps) {
-    if (prevProps.visible !== this.props.visible && this.props.visible) {
-      this.getAllRounds();
-    }
-  }
-
   render() {
+    let { rounds } = this.context;
     return (
       <Modal
         visible={this.props.visible}
@@ -107,7 +70,7 @@ export default class DetailsModal extends Component {
       >
         <div className="details-round-wrap">
           <Table
-            dataSource={this.state.list}
+            dataSource={rounds}
             columns={this.getTableColumns()}
             pagination={false}
             scroll={{ x: true }}
