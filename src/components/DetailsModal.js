@@ -43,8 +43,23 @@ export default class DetailsModal extends Component {
             return this.getUserRoundInfo(user.get('objectId'), index);
           },
         };
-      })
+      }),
+      {
+        title: '操作',
+        key: 'opt',
+        render: (text, record, index) => {
+          return (
+            <div className="details-opt">
+              <span onClick={() => this.handleModifyClick(index)}>修改</span>
+            </div>
+          );
+        },
+      }
     );
+  }
+
+  handleModifyClick = (index) => {
+    this.props.onModify(index);
   }
 
   getUserRoundInfo = (userId, index) => {

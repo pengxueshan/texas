@@ -53,3 +53,10 @@
 .details-round-wrap {
   padding: 20px 0;
 }
+.details-opt {
+  width: 100px;
+}
+.details-opt span {
+  cursor: pointer;
+  color: #1890ff;
+}

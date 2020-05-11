@@ -9,6 +9,7 @@ import { Button } from 'antd';
 import AddRoundModal from './components/AddRoundModal';
 import DetailsModal from './components/DetailsModal';
 import _ from 'lodash';
+import Big from 'big.js';
 
 export default class App extends Component {
   state = {
@@ -24,6 +25,9 @@ export default class App extends Component {
     showModal: false,
     addLoading: false,
     showDetailsModal: false,
+
+    modifyIndex: -1,
+    isModify: false,
   };
   componentDidMount() {
     this.getUsers();
@@ -64,13 +68,17 @@ export default class App extends Component {
     return query.find();
   };
   setRoundUserInfo = (list) => {
-    this.setState({
-      roundUserInfo: list,
-    }, this.calcList);
+    this.setState(
+      {
+        roundUserInfo: list,
+      },
+      this.calcList
+    );
   };
   handleAddClick = () => {
     this.setState({
       showModal: true,
+      isModify: false,
     });
   };
   handleDetailsClick = () => {
@@ -131,8 +139,12 @@ export default class App extends Component {
         if (amount < userRoundInfo.min) {
           userRoundInfo.min = amount;
         }
-        userRoundInfo.total += amount;
-        userRoundInfo.totalBalance += amount * leverage;
+        userRoundInfo.total = new Big(userRoundInfo.total)
+          .plus(amount)
+          .valueOf();
+        userRoundInfo.totalBalance = new Big(userRoundInfo.totalBalance)
+          .plus(new Big(amount).times(leverage))
+          .valueOf();
         userRoundInfo.count++;
         tmp[playerId] = userRoundInfo;
       });
@@ -142,9 +154,17 @@ export default class App extends Component {
       return b.totalBalance - a.totalBalance;
     });
     this.setState({
-      list
+      list,
     });
   }
+  handleModify = (index) => {
+    this.setState({
+      modifyIndex: index,
+      isModify: true,
+      showDetailsModal: false,
+      showModal: true,
+    });
+  };
   render() {
     let {
       users,
@@ -153,7 +173,7 @@ export default class App extends Component {
       setUsers,
       setRounds,
       setRoundUserInfo,
-      list
+      list,
     } = this.state;
     return (
       <div className="App">
@@ -181,11 +201,14 @@ export default class App extends Component {
             visible={this.state.showModal}
             onOk={this.handleModalConfirm}
             onCancel={this.handleModalCancel}
+            isModify={this.state.isModify}
+            roundIndex={this.state.modifyIndex}
           ></AddRoundModal>
           <DetailsModal
             visible={this.state.showDetailsModal}
             onOk={this.handleDetailsConfirm}
             onCancel={this.handleDetailsCancel}
+            onModify={this.handleModify}
           />
         </AppContext.Provider>
       </div>

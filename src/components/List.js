@@ -38,7 +38,7 @@ export default function List({ list }) {
   }
 
   return (
-    <div className>
+    <div>
       <Table dataSource={list} columns={columns} />
     </div>
   );
