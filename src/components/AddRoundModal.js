@@ -88,7 +88,7 @@ export default class AddRoundModal extends Component {
 
   handleAmountChange = (v, user) => {
     let userAmount = this.state.userAmount;
-    userAmount[user.get('objectId')] = v;
+    userAmount[user.get('objectId')] = +v;
     this.setState({
       userAmount,
     });
@@ -197,7 +197,7 @@ export default class AddRoundModal extends Component {
         onCancel={this.handleCancel}
         onOk={this.handleOk}
         confirmLoading={this.state.loading}
-        width={800}
+        width={1200}
         destroyOnClose
       >
         <div className="add-round-wrap">

@@ -120,6 +120,7 @@ export default class App extends Component {
       round.forEach((info) => {
         let player = info.get('player');
         let amount = info.get('amount');
+        amount = +amount;
         let playerId = player.get('objectId');
         let userRoundInfo = tmp[playerId];
         if (!userRoundInfo) {
@@ -145,7 +146,9 @@ export default class App extends Component {
         userRoundInfo.totalBalance = new Big(userRoundInfo.totalBalance)
           .plus(new Big(amount).times(leverage))
           .valueOf();
-        userRoundInfo.count++;
+        if (amount !== 0) {
+          userRoundInfo.count++;
+        }
         tmp[playerId] = userRoundInfo;
       });
     });

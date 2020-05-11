@@ -81,7 +81,7 @@ export default class DetailsModal extends Component {
         visible={this.props.visible}
         onCancel={this.props.onCancel}
         onOk={this.props.onOk}
-        width={800}
+        width={1200}
       >
         <div className="details-round-wrap">
           <Table
