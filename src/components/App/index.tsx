@@ -1,18 +1,62 @@
 import React, { Component } from 'react';
-import Header from './components/Header';
-import List from './components/List';
-import './App.css';
+import Header from '../Header';
+import List from '../List';
+import './App.scss';
 import 'antd/dist/antd.css';
-import AppContext from './store/context';
+import AppContext from '../../store/context';
 import AV from 'leancloud-storage';
 import { Button } from 'antd';
-import AddRoundModal from './components/AddRoundModal';
-import DetailsModal from './components/DetailsModal';
+import AddRoundModal from '../AddRoundModal';
+import DetailsModal from '../DetailsModal';
 import _ from 'lodash';
 import Big from 'big.js';
+import { ListItem } from '../List';
+
+interface State {
+  users: AV.Object[];
+  rounds: AV.Object[];
+  roundUserInfo: AV.Object[][];
+  setUsers: Function;
+  setRounds: Function;
+  setRoundUserInfo: Function;
+
+  list: [];
+
+  showModal: boolean;
+  addLoading: boolean;
+  showDetailsModal: boolean;
+
+  modifyIndex: number;
+  isModify: boolean;
+}
+
+interface Map {
+  [key: string]: ListItem;
+}
 
 export default class App extends Component {
-  state = {
+  setUsers = (list: AV.Queriable[]) => {
+    this.setState({
+      users: list,
+    });
+  };
+
+  setRounds = (list: AV.Queriable[]) => {
+    this.setState({
+      rounds: list,
+    });
+  };
+
+  setRoundUserInfo = (list: AV.Queriable[][]) => {
+    this.setState(
+      {
+        roundUserInfo: list,
+      },
+      this.calcList
+    );
+  };
+
+  state: State = {
     users: [],
     rounds: [],
     roundUserInfo: [],
@@ -35,13 +79,8 @@ export default class App extends Component {
   }
   getUsers = () => {
     const query = new AV.Query('Player');
-    query.find().then((players) => {
+    query.find().then((players: AV.Queriable[]) => {
       this.setUsers(players);
-    });
-  };
-  setUsers = (list) => {
-    this.setState({
-      users: list,
     });
   };
   getAllRounds = () => {
@@ -57,23 +96,10 @@ export default class App extends Component {
       });
     });
   };
-  setRounds = (list) => {
-    this.setState({
-      rounds: list,
-    });
-  };
-  getRoundInfo = (round) => {
+  getRoundInfo = (round: AV.Queriable) => {
     const query = new AV.Query('RoundUserInfo');
     query.equalTo('round', round);
     return query.find();
-  };
-  setRoundUserInfo = (list) => {
-    this.setState(
-      {
-        roundUserInfo: list,
-      },
-      this.calcList
-    );
   };
   handleAddClick = () => {
     this.setState({
@@ -109,13 +135,13 @@ export default class App extends Component {
   };
   calcList() {
     let { roundUserInfo, rounds } = this.state;
-    let tmp = {};
-    let lastRound = rounds[rounds.length - 1];
+    let tmp: Map = {};
+    let lastRound: AV.Object = rounds[rounds.length - 1];
     let currentLeverage = 0;
     if (lastRound) {
       currentLeverage = lastRound.get('leverage');
     }
-    roundUserInfo.forEach((round, index) => {
+    roundUserInfo.forEach((round: AV.Object[], index) => {
       let leverage = rounds[index].get('leverage');
       round.forEach((info) => {
         let player = info.get('player');
@@ -140,10 +166,10 @@ export default class App extends Component {
         if (amount < userRoundInfo.min) {
           userRoundInfo.min = amount;
         }
-        userRoundInfo.total = new Big(userRoundInfo.total)
+        userRoundInfo.total = +new Big(userRoundInfo.total)
           .plus(amount)
           .valueOf();
-        userRoundInfo.totalBalance = new Big(userRoundInfo.totalBalance)
+        userRoundInfo.totalBalance = +new Big(userRoundInfo.totalBalance)
           .plus(new Big(amount).times(leverage))
           .valueOf();
         if (amount !== 0) {
@@ -153,14 +179,14 @@ export default class App extends Component {
       });
     });
     let list = _.values(tmp);
-    list.sort((a, b) => {
+    list.sort((a: ListItem, b: ListItem) => {
       return b.totalBalance - a.totalBalance;
     });
     this.setState({
       list,
     });
   }
-  handleModify = (index) => {
+  handleModify = (index: number) => {
     this.setState({
       modifyIndex: index,
       isModify: true,

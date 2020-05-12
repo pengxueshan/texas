@@ -1,21 +1,36 @@
 import React, { useContext } from 'react';
 import { Table } from 'antd';
-import AppContext from '../store/context';
+import AppContext from '../../store/context';
+import AV from 'leancloud-storage';
 
-export default function List({ list }) {
+interface Props {
+  list: Array<ListItem>;
+}
+
+export interface ListItem {
+  max: number;
+  min: number;
+  total: number;
+  totalBalance: number;
+  count: number;
+  player: AV.Object;
+  currentLeverage: number;
+}
+
+export default function List({ list }: Props) {
   const context = useContext(AppContext);
   const columns = [
     {
       title: '排名',
       key: 'rank',
-      render: (text, record, index) => {
+      render: (text: string, record: ListItem, index: number) => {
         return index + 1;
       },
     },
     {
       title: '选手',
       key: 'username',
-      render: (text, record) => {
+      render: (text: string, record: ListItem) => {
         return getUserName(record.player.get('objectId'));
       },
     },
@@ -28,9 +43,9 @@ export default function List({ list }) {
     { title: '操作', key: 'opt', dataIndex: 'opt' },
   ];
 
-  function getUserName(playerId) {
-    let { users } = context;
-    let user = users.find((item) => item.get('objectId') === playerId);
+  function getUserName(playerId: string) {
+    let users: AV.Object[] = context.users;
+    let user = users.find((item: AV.Object) => item.get('objectId') === playerId);
     if (user) {
       return user.get('name');
     }
