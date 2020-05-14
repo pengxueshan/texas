@@ -3,6 +3,7 @@ import { Modal, Input, Button, message } from 'antd';
 import './session.scss';
 import AV from 'leancloud-storage';
 import AppContext from '../../store/context';
+import { MD5 } from 'crypto-js';
 
 interface Props {
   visible: boolean;
@@ -13,6 +14,7 @@ export default function Session({ visible }: Props) {
   const [mobile, setMobile] = useState('');
   const [verifyCode, setVerifyCode] = useState('');
   const [verifyCount, setVerifyCount] = useState(0);
+  const [inviteCode, setInviteCodeChange] = useState('');
   const context = useContext(AppContext);
 
   function handleOk() {
@@ -22,14 +24,23 @@ export default function Session({ visible }: Props) {
     if (!verifyCode) {
       return message.error('请输入验证码');
     }
+    if (!inviteCode) {
+      return message.error('请输入邀请码');
+    }
+    if (MD5(inviteCode).toString() !== '41b9df4a217bb3c10b1c339358111b0d') {
+      return message.error('邀请码错误');
+    }
     setConfirmLoading(true);
-    AV.User.signUpOrlogInWithMobilePhone(`+86${mobile}`, verifyCode).then((user) => {
-      setConfirmLoading(false);
-      context.setShowSession(false);
-    }, (error) => {
-      setConfirmLoading(false);
-      message.error(error.message);
-    });
+    AV.User.signUpOrlogInWithMobilePhone(`+86${mobile}`, verifyCode).then(
+      (user) => {
+        setConfirmLoading(false);
+        context.setShowSession(false);
+      },
+      (error) => {
+        setConfirmLoading(false);
+        message.error(error.message);
+      }
+    );
   }
 
   function handleCancel() {
@@ -71,6 +82,10 @@ export default function Session({ visible }: Props) {
     setTimeout(countDown, 1000);
   }
 
+  function handleInviteChange(e: ChangeEvent<HTMLInputElement>) {
+    setInviteCodeChange(e.target.value);
+  }
+
   return (
     <Modal
       title="登录或注册"
@@ -93,7 +108,16 @@ export default function Session({ visible }: Props) {
             value={verifyCode}
             onChange={handleVerifyCodeChange}
           />
-          <Button disabled={verifyCount > 0} onClick={handleVerifyClick}>{getButtonText()}</Button>
+          <Button disabled={verifyCount > 0} onClick={handleVerifyClick}>
+            {getButtonText()}
+          </Button>
+        </div>
+        <div className="form-row">
+          <Input
+            placeholder="邀请码"
+            value={inviteCode}
+            onChange={handleInviteChange}
+          />
         </div>
       </div>
     </Modal>

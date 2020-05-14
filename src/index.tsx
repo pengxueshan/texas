@@ -4,6 +4,8 @@ import './index.scss';
 import App from './components/App';
 import * as serviceWorker from './serviceWorker';
 import AV from 'leancloud-storage';
+import zhCN from 'antd/es/locale/zh_CN';
+import { ConfigProvider } from 'antd';
 
 AV.init({
   appId: 'xfKlG0D6VO6MgwOUTzQ31f7W-gzGzoHsz',
@@ -13,7 +15,9 @@ AV.init({
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <ConfigProvider locale={zhCN}>
+      <App />
+    </ConfigProvider>
   </React.StrictMode>,
   document.getElementById('root')
 );
