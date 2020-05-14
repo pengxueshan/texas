@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { Modal, InputNumber, DatePicker, Table } from 'antd';
+import { Modal, InputNumber, DatePicker, Table, message } from 'antd';
 import AppContext from '../../store/context';
 import AV from 'leancloud-storage';
 import moment from 'moment';
@@ -75,10 +75,12 @@ export default function AddRoundModal({
         findUser.set('amount', userAmount[userId]);
         allRoundUserInfos.push(findUser);
       });
-      Promise.all([r.save(), AV.Object.saveAll(allRoundUserInfos)]).then(() => {
+      return Promise.all([r.save(), AV.Object.saveAll(allRoundUserInfos)]).then(() => {
         if (onOk) {
           onOk();
         }
+      }).catch(e => {
+        message.error(e.message);
       });
     } else {
       const Round = AV.Object.extend('Round');
@@ -97,10 +99,12 @@ export default function AddRoundModal({
         roundUserInfo.set('amount', userAmount[userId]);
         allRoundUserInfos.push(roundUserInfo);
       });
-      AV.Object.saveAll(allRoundUserInfos).then(() => {
+      return AV.Object.saveAll(allRoundUserInfos).then(() => {
         if (onOk) {
           onOk();
         }
+      }).catch(e => {
+        message.error(e.message);
       });
     }
   }
