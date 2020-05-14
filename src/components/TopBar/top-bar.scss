@@ -1,0 +1,10 @@
+.top-bar {
+  display: flex;
+  justify-content: flex-end;
+  height: 60px;
+  background-color: #eee;
+  align-items: center;
+  span {
+    margin-right: 16px;
+  }
+}

@@ -11,11 +11,11 @@ interface Props {
 }
 
 interface OnModifyFunc {
-  (index: number): void
+  (index: number): void;
 }
 
 interface EmptyFunc {
-  (): void
+  (): void;
 }
 
 export default function DetailsModal({
@@ -64,8 +64,11 @@ export default function DetailsModal({
             return getUserRoundInfo(user.get('objectId'), index);
           },
         };
-      }),
-      {
+      })
+    );
+    const currentUser = AV.User.current();
+    if (currentUser) {
+      ret = ret.concat({
         title: '操作',
         key: 'opt',
         render: (text: string, record: AV.Object, index: number) => {
@@ -75,8 +78,8 @@ export default function DetailsModal({
             </div>
           );
         },
-      }
-    );
+      });
+    }
     return ret;
   }
 

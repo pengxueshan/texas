@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import Header from '../Header';
 import List from '../List';
-import './App.scss';
+import './app.scss';
 import 'antd/dist/antd.css';
-import AppContext from '../../store/context';
+import AppContext, { ContextType } from '../../store/context';
 import AV from 'leancloud-storage';
 import { Button } from 'antd';
 import AddRoundModal from '../AddRoundModal';
@@ -11,15 +11,9 @@ import DetailsModal from '../DetailsModal';
 import _ from 'lodash';
 import Big from 'big.js';
 import { ListItem } from '../List';
+import TopBar from '../TopBar';
 
-interface State {
-  users: AV.Object[];
-  rounds: AV.Object[];
-  roundUserInfo: AV.Object[][];
-  setUsers: Function;
-  setRounds: Function;
-  setRoundUserInfo: Function;
-
+interface State extends ContextType {
   list: [];
 
   showModal: boolean;
@@ -56,13 +50,21 @@ export default class App extends Component {
     );
   };
 
+  setShowSession = (isShow?: boolean) => {
+    this.setState({
+      showSession: !!isShow,
+    });
+  };
+
   state: State = {
     users: [],
     rounds: [],
     roundUserInfo: [],
+    showSession: false,
     setUsers: this.setUsers,
     setRounds: this.setRounds,
     setRoundUserInfo: this.setRoundUserInfo,
+    setShowSession: this.setShowSession,
 
     list: [],
 
@@ -199,32 +201,40 @@ export default class App extends Component {
       users,
       rounds,
       roundUserInfo,
+      showSession,
       setUsers,
       setRounds,
       setRoundUserInfo,
+      setShowSession,
       list,
     } = this.state;
+    const currentUser = AV.User.current();
     return (
-      <div className="App">
+      <div className="app">
         <AppContext.Provider
           value={{
             users,
             rounds,
             roundUserInfo,
+            showSession,
             setUsers,
             setRounds,
             setRoundUserInfo,
+            setShowSession,
           }}
         >
+          <TopBar />
           <Header />
           <List list={list} />
           <div className="btn-wrap">
             <Button type="primary" onClick={this.handleDetailsClick}>
               明细
             </Button>
-            <Button type="primary" onClick={this.handleAddClick}>
-              增加记录
-            </Button>
+            {currentUser ? (
+              <Button type="primary" onClick={this.handleAddClick}>
+                增加记录
+              </Button>
+            ) : null}
           </div>
           <AddRoundModal
             visible={this.state.showModal}
