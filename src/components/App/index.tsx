@@ -11,6 +11,7 @@ import TopBar from '../TopBar';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import Home from '../../pages/Home';
 import Photo from '../../pages/Photo';
+import Message from '../../pages/Message';
 
 interface State extends ContextType {
   list: [];
@@ -178,6 +179,9 @@ export default class App extends Component {
             <Switch>
               <Route path="/photo">
                 <Photo />
+              </Route>
+              <Route path="/message">
+                <Message />
               </Route>
               <Route path="/">
                 <Home list={list} onAddDone={this.handleAddDone} />

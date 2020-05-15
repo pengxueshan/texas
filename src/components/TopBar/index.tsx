@@ -36,6 +36,9 @@ export default function TopBar() {
           <li>
             <Link to="/photo">精彩瞬间</Link>
           </li>
+          <li>
+            <Link to="/message">聊天室</Link>
+          </li>
         </ul>
       </nav>
       <div className="user-section">

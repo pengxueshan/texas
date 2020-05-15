@@ -1,0 +1,27 @@
+@import '../../vars.scss';
+
+.message-wrap {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 60px);
+  .messages {
+    flex: 1;
+    padding: 16px;
+    overflow: hidden;
+    overflow-y: auto;
+  }
+  .message-item {
+    margin-bottom: 16px;
+    .username {
+      margin-right: 8px;
+      color: $primary;
+    }
+  }
+  .send-wrap {
+    display: flex;
+    height: 60px;
+    button {
+      height: 100%;
+    }
+  }
+}
