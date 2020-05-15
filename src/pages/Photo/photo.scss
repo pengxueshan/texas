@@ -1,0 +1,28 @@
+.page.photo {
+  padding: 16px;
+  .upload-wrap {
+    margin-bottom: 16px;
+  }
+  .pics {
+    img {
+      width: 100%;
+      margin-bottom: 16px;
+      animation: fadeIn 1s ease-in;
+    }
+  }
+  .spin-wrap {
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

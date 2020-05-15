@@ -1,27 +1,19 @@
 import React, { Component } from 'react';
 import Header from '../Header';
-import List from '../List';
 import './app.scss';
 import 'antd/dist/antd.css';
 import AppContext, { ContextType } from '../../store/context';
 import AV from 'leancloud-storage';
-import { Button } from 'antd';
-import AddRoundModal from '../AddRoundModal';
-import DetailsModal from '../DetailsModal';
 import _ from 'lodash';
 import Big from 'big.js';
 import { ListItem } from '../List';
 import TopBar from '../TopBar';
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import Home from '../../pages/Home';
+import Photo from '../../pages/Photo';
 
 interface State extends ContextType {
   list: [];
-
-  showModal: boolean;
-  addLoading: boolean;
-  showDetailsModal: boolean;
-
-  modifyIndex: number;
-  isModify: boolean;
 }
 
 interface Map {
@@ -67,24 +59,20 @@ export default class App extends Component {
     setShowSession: this.setShowSession,
 
     list: [],
-
-    showModal: false,
-    addLoading: false,
-    showDetailsModal: false,
-
-    modifyIndex: -1,
-    isModify: false,
   };
+
   componentDidMount() {
     this.getUsers();
     this.getAllRounds();
   }
+
   getUsers = () => {
     const query = new AV.Query('Player');
     query.find().then((players: AV.Queriable[]) => {
       this.setUsers(players);
     });
   };
+
   getAllRounds = () => {
     const rounds = new AV.Query('Round');
     rounds.find().then((res) => {
@@ -98,51 +86,20 @@ export default class App extends Component {
       });
     });
   };
+
   getRoundInfo = (round: AV.Queriable) => {
     const query = new AV.Query('RoundUserInfo');
     query.equalTo('round', round);
     return query.find();
   };
-  handleAddClick = () => {
-    this.setState({
-      showModal: true,
-      isModify: false,
-    });
-  };
-  handleDetailsClick = () => {
-    this.setState({
-      showDetailsModal: true,
-    });
-  };
-  handleModalCancel = () => {
-    this.setState({
-      showModal: false,
-    });
-  };
-  handleModalConfirm = () => {
-    this.setState({
-      showModal: false,
-    });
+
+  handleAddDone = () => {
     this.getAllRounds();
   };
-  handleDetailsConfirm = () => {
-    this.setState({
-      showDetailsModal: false,
-    });
-  };
-  handleDetailsCancel = () => {
-    this.setState({
-      showDetailsModal: false,
-    });
-  };
+
   calcList() {
     let { roundUserInfo, rounds } = this.state;
     let tmp: Map = {};
-    let lastRound: AV.Object = rounds[rounds.length - 1];
-    let currentLeverage = 0;
-    if (lastRound) {
-      currentLeverage = lastRound.get('leverage');
-    }
     roundUserInfo.forEach((round: AV.Object[], index) => {
       let leverage = rounds[index].get('leverage');
       round.forEach((info) => {
@@ -159,7 +116,7 @@ export default class App extends Component {
             totalBalance: 0,
             count: 0,
             player,
-            currentLeverage,
+            currentLeverage: 0,
           };
         }
         if (amount > userRoundInfo.max) {
@@ -188,14 +145,7 @@ export default class App extends Component {
       list,
     });
   }
-  handleModify = (index: number) => {
-    this.setState({
-      modifyIndex: index,
-      isModify: true,
-      showDetailsModal: false,
-      showModal: true,
-    });
-  };
+
   render() {
     let {
       users,
@@ -208,7 +158,6 @@ export default class App extends Component {
       setShowSession,
       list,
     } = this.state;
-    const currentUser = AV.User.current();
     return (
       <div className="app">
         <AppContext.Provider
@@ -223,32 +172,18 @@ export default class App extends Component {
             setShowSession,
           }}
         >
-          <TopBar />
-          <Header />
-          <List list={list} />
-          <div className="btn-wrap">
-            <Button type="primary" onClick={this.handleDetailsClick}>
-              明细
-            </Button>
-            {currentUser ? (
-              <Button type="primary" onClick={this.handleAddClick}>
-                增加记录
-              </Button>
-            ) : null}
-          </div>
-          <AddRoundModal
-            visible={this.state.showModal}
-            onOk={this.handleModalConfirm}
-            onCancel={this.handleModalCancel}
-            isModify={this.state.isModify}
-            roundIndex={this.state.modifyIndex}
-          ></AddRoundModal>
-          <DetailsModal
-            visible={this.state.showDetailsModal}
-            onOk={this.handleDetailsConfirm}
-            onCancel={this.handleDetailsCancel}
-            onModify={this.handleModify}
-          />
+          <Router>
+            <TopBar />
+            {/* <Header /> */}
+            <Switch>
+              <Route path="/photo">
+                <Photo />
+              </Route>
+              <Route path="/">
+                <Home list={list} onAddDone={this.handleAddDone} />
+              </Route>
+            </Switch>
+          </Router>
         </AppContext.Provider>
       </div>
     );

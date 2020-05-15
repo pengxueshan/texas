@@ -1,10 +1,30 @@
 .top-bar {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   height: 60px;
   background-color: #eee;
   align-items: center;
-  span {
-    margin-right: 16px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+
+  .user-section {
+    span {
+      margin-right: 16px;
+    }
+  }
+
+  nav {
+    margin-left: 16px;
+    ul {
+      display: flex;
+      align-items: center;
+      margin: 0;
+    }
+    li {
+      margin-right: 16px;
+    }
   }
 }
