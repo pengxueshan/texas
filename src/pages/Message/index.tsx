@@ -120,7 +120,6 @@ export default class IM extends Component {
 
       // 当前用户收到了某一条消息，可以通过响应 Event.MESSAGE 这一事件来处理。
       this.client.on(Event.MESSAGE, (message: TextMessage, conversation) => {
-        console.log('收到新消息：' + message);
         this.updateMessageList(message);
       });
     }

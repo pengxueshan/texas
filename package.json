@@ -32,7 +32,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "server": "pm2 serve ./build 3000 -n texas"
+    "server": "pm2 serve ./build 3000 -n texas --spa"
   },
   "eslintConfig": {
     "extends": "react-app"
