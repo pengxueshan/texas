@@ -76,7 +76,7 @@ export default function List({ list }: Props) {
 
   return (
     <div>
-      <Table dataSource={list} columns={columns} />
+      <Table dataSource={list} columns={columns} pagination={false} />
     </div>
   );
 }

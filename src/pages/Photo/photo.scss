@@ -2,13 +2,21 @@
   padding: 16px;
   .upload-wrap {
     margin-bottom: 16px;
+    text-align: right;
+    position: sticky;
+    top: 76px;
   }
   .pics {
-    text-align: center;
     img {
-      width: 25%;
+      width: calc(25% - 12px);
       margin: 8px;
       animation: fadeIn 1s ease-in;
+      &:nth-child(4n) {
+        margin-right: 0;
+      }
+      &:nth-child(4n + 1) {
+        margin-left: 0;
+      }
     }
   }
   .spin-wrap {
