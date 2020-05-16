@@ -1,4 +1,4 @@
-import React, { useEffect, useState, ChangeEvent, KeyboardEvent, useRef } from 'react';
+import React, { ChangeEvent, KeyboardEvent, Component, createRef } from 'react';
 import { Input, Button, Spin } from 'antd';
 import AV from 'leancloud-storage';
 import {
@@ -12,132 +12,203 @@ import {
 import moment from 'moment';
 import './message.scss';
 
-export default function IM() {
-  const [room, setRoom] = useState<ChatRoom>();
-  const [textMessage, setTextMessage] = useState('');
-  const [messageList, setMessageList] = useState<TextMessage[]>([]);
-  const [isJoining, setIsJoining] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
+const HISTORY_MESSAGES_KEY = 'texasMessages';
 
-  useEffect(() => {
-    const user = AV.User.current();
-    if (user) {
-      setIsJoining(true);
+interface AttrMap extends Object {
+  [key: string]: any;
+}
+
+interface State {
+  text: string;
+  messageList: TextMessage[];
+  isJoining: boolean;
+}
+
+export default class IM extends Component {
+  state: State = {
+    text: '',
+    messageList: [],
+    isJoining: false,
+  };
+
+  private client: IMClient | null = null;
+  private room: ChatRoom | null = null;
+  private scrollRef = createRef<HTMLDivElement>();
+  private user = AV.User.current();
+
+  componentDidMount() {
+    if (this.user) {
       new Realtime({
         appId: 'xfKlG0D6VO6MgwOUTzQ31f7W-gzGzoHsz',
         appKey: 'k9TuwPqFQmsMqj3HYa83WCFs',
         server: 'https://xfklg0d6.lc-cn-n1-shared.com',
       })
-        .createIMClient(user)
-        .then((messageUser) => {
-          var query = messageUser.getQuery().equalTo('tr', true); // 聊天室对象
+        .createIMClient(this.user)
+        .then((client) => {
+          this.client = client;
+          var query = client.getQuery().equalTo('tr', true); // 聊天室对象
           query
             .find()
-            .then(function (conversations) {
-              listenMessage(messageUser);
+            .then((conversations) => {
               if (conversations.length < 1) {
-                createRoom(messageUser);
+                this.createRoom();
               } else {
-                joinRoom(conversations[0]);
+                this.joinRoom(conversations[0]);
               }
+            })
+            .then(() => {
+              this.listenMessage();
             })
             .catch(console.error);
         });
     }
-  }, []);
-
-  function createRoom(client: IMClient) {
-    client.createChatRoom({ name: '深挖洞，广积粮，不称王' }).then((r) => {
-      setRoom(r);
-      setIsJoining(false);
-    });
   }
 
-  function joinRoom(r: PresistentConversation) {
-    r.join().then(() => {
-      setRoom(r);
-      setIsJoining(false);
-    });
-  }
-
-  function handleTextMessageChange(e: ChangeEvent<HTMLInputElement>) {
-    setTextMessage(e.target.value);
-  }
-
-  function handleTextMessageEnterChange(e: KeyboardEvent<HTMLInputElement>) {
-    setTextMessage(e.currentTarget.value);
-    handleSend();
-  }
-
-  function listenMessage(client: IMClient) {
-    // 当前用户被添加至某个对话
-    client.on(Event.INVITED, (payload, conversation) => {
-      // console.log(payload.invitedBy, conversation.id);
-    });
-
-    // 当前用户收到了某一条消息，可以通过响应 Event.MESSAGE 这一事件来处理。
-    client.on(Event.MESSAGE, (message: TextMessage, conversation) => {
-      console.log('收到新消息：' + message);
-      updateMessageList(message);
-    });
-  }
-
-  function handleSend() {
-    if (!textMessage) return;
-    const m = new TextMessage(textMessage);
-    console.log('messgae:', m);
-    if (room) {
-      room.send(m);
-      updateMessageList(m);
-      setTextMessage('');
+  createRoom() {
+    if (this.client) {
+      this.client
+        .createChatRoom({ name: '深挖洞，广积粮，不称王' })
+        .then((r) => {
+          this.room = r;
+          this.setState({
+            isJoining: false,
+          });
+          this.loadLocalMessages();
+        });
     }
   }
 
-  function updateMessageList(m: TextMessage) {
-    setMessageList(messageList.concat(m));
+  loadLocalMessages() {
+    let messages = localStorage.getItem(HISTORY_MESSAGES_KEY);
+    if (messages) {
+      messages = JSON.parse(messages);
+      this.setState({
+        messageList: messages
+      });
+    }
+  }
+
+  joinRoom(r: PresistentConversation) {
+    r.join().then(() => {
+      this.room = r;
+      this.setState({
+        isJoining: false,
+      });
+      this.loadLocalMessages();
+    });
+  }
+
+  handleTextMessageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    this.setState({
+      text: e.target.value,
+    });
+  };
+
+  handleTextMessageEnterChange = (e: KeyboardEvent<HTMLInputElement>) => {
+    this.setState({
+      text: e.currentTarget.value,
+    });
+    this.handleSend();
+  };
+
+  listenMessage() {
+    if (this.client) {
+      // 当前用户被添加至某个对话
+      this.client.on(Event.INVITED, (payload, conversation) => {
+        // console.log(payload.invitedBy, conversation.id);
+      });
+
+      // 当前用户收到了某一条消息，可以通过响应 Event.MESSAGE 这一事件来处理。
+      this.client.on(Event.MESSAGE, (message: TextMessage, conversation) => {
+        console.log('收到新消息：' + message);
+        this.updateMessageList(message);
+      });
+    }
+  }
+
+  handleSend = () => {
+    if (!this.state.text) return;
+    const m = new TextMessage(this.state.text);
+    m.setAttributes({ senderName: this.user.getUsername() });
+    if (this.room) {
+      this.room.send(m);
+      this.updateMessageList(m);
+      this.setState({
+        text: '',
+      });
+    }
+  };
+
+  updateMessageList(m: TextMessage) {
+    this.setState(
+      {
+        messageList: this.state.messageList.concat(m),
+      },
+      () => {
+        localStorage.setItem(
+          HISTORY_MESSAGES_KEY,
+          JSON.stringify(this.state.messageList.slice(0, 100))
+        );
+      }
+    );
     setTimeout(() => {
-      let current = scrollRef.current;
+      let current = this.scrollRef.current;
       if (current) {
         current.scrollTo(0, current.scrollHeight);
       }
     }, 100);
   }
 
-  if (isJoining) {
+  getSenderName(m: TextMessage) {
+    let attrs: AttrMap = m.attributes;
+    return attrs['senderName'];
+  }
+
+  render() {
+    if (!this.user) {
+      return (
+        <div className="message-wrap">
+          <div>请先登录</div>
+        </div>
+      );
+    }
+
+    if (this.state.isJoining) {
+      return (
+        <div className="message-wrap">
+          <Spin tip="正在加入聊天室..."></Spin>
+        </div>
+      );
+    }
+
     return (
       <div className="message-wrap">
-        <Spin tip="正在加入聊天室..."></Spin>
+        <div className="messages" ref={this.scrollRef}>
+          {this.state.messageList.map((m) => {
+            return (
+              <div className="message-item" key={m.id}>
+                <div>
+                  <span className="username">{this.getSenderName(m)}</span>
+                  <span className="message-time">
+                    {moment(m.timestamp).format('YYYY/MM/DD HH:mm:ss')}
+                  </span>
+                </div>
+                <div className="message-content">{m.text}</div>
+              </div>
+            );
+          })}
+        </div>
+        <div className="send-wrap">
+          <Input
+            value={this.state.text}
+            onChange={this.handleTextMessageChange}
+            onPressEnter={this.handleTextMessageEnterChange}
+          />
+          <Button size="large" onClick={this.handleSend}>
+            发送
+          </Button>
+        </div>
       </div>
     );
   }
-
-  return (
-    <div className="message-wrap">
-      <div className="messages" ref={scrollRef}>
-        {messageList.map((m) => {
-          return (
-            <div className="message-item" key={m.id}>
-              <div>
-                <span className="username">{m.from}</span>
-                <span className="message-time">
-                  {moment(m.timestamp).format('YYYY/MM/DD HH:mm:ss')}
-                </span>
-              </div>
-              <div className="message-content">{m.text}</div>
-            </div>
-          );
-        })}
-      </div>
-      <div className="send-wrap">
-        <Input
-          value={textMessage}
-          onChange={handleTextMessageChange}
-          onPressEnter={handleTextMessageEnterChange}
-        />
-        <Button size="large" onClick={handleSend}>
-          发送
-        </Button>
-      </div>
-    </div>
-  );
 }
