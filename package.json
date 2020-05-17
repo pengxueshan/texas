@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@ant-design/icons": "^4.1.0",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
@@ -32,7 +33,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "server": "pm2 serve ./build 3000 -n texas --spa"
+    "server": "pm2 stop texas && pm2 serve ./build 3000 -n texas --spa"
   },
   "eslintConfig": {
     "extends": "react-app"

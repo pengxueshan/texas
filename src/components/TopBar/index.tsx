@@ -3,8 +3,9 @@ import './top-bar.scss';
 import Session from '../Session';
 import AppContext from '../../store/context';
 import AV from 'leancloud-storage';
-import { Modal } from 'antd';
+import { Modal, Avatar } from 'antd';
 import { Link } from 'react-router-dom';
+import { UserOutlined } from '@ant-design/icons';
 
 export default function TopBar() {
   const context = useContext(AppContext);
@@ -25,6 +26,10 @@ export default function TopBar() {
   }
 
   const currentUser = AV.User.current();
+  let avatar;
+  if (currentUser) {
+    avatar = currentUser.get('avatar');
+  }
 
   return (
     <div className="top-bar">
@@ -48,8 +53,20 @@ export default function TopBar() {
           </span>
         ) : (
           [
-            <span key="user-name">{currentUser.getUsername()}</span>,
-            <span key="logout" className="link-style" onClick={handleSignoutClick}>
+            avatar ? (
+              <Avatar size={32} src={avatar.get('url')} />
+            ) : (
+              <Avatar size={32} icon={<UserOutlined />} />
+            ),
+            // <span key="user-name">{currentUser.getUsername()}</span>,
+            <Link key="setting" to="/profile">
+              设置
+            </Link>,
+            <span
+              key="logout"
+              className="link-style"
+              onClick={handleSignoutClick}
+            >
               退出登录
             </span>,
           ]

@@ -1,7 +1,9 @@
 import React, { useContext } from 'react';
-import { Table } from 'antd';
+import { Table, Avatar } from 'antd';
 import AppContext from '../../store/context';
 import AV from 'leancloud-storage';
+import { UserOutlined } from '@ant-design/icons';
+import './list.scss';
 
 interface Props {
   list: Array<ListItem>;
@@ -31,7 +33,21 @@ export default function List({ list }: Props) {
       title: '选手',
       key: 'username',
       render: (text: string, record: ListItem) => {
-        return getUserName(record.player.get('objectId'));
+        let player = getPlayer(record.player.get('objectId'));
+        let avatar = player?.get('avatar');
+        let name = player?.get('name');
+        return (
+          <div className="player-wrap">
+            <div className="avatar-wrap">
+              {avatar ? (
+                <Avatar size={24} src={avatar.get('url')} />
+              ) : (
+                <Avatar size={24} icon={<UserOutlined />} />
+              )}
+            </div>
+            {name}
+          </div>
+        );
       },
     },
     { title: '参赛次数', key: 'count', dataIndex: 'count' },
@@ -63,19 +79,13 @@ export default function List({ list }: Props) {
     { title: '操作', key: 'opt', dataIndex: 'opt' },
   ];
 
-  function getUserName(playerId: string) {
+  function getPlayer(playerId: string) {
     let users: AV.Object[] = context.users;
-    let user = users.find(
-      (item: AV.Object) => item.get('objectId') === playerId
-    );
-    if (user) {
-      return user.get('name');
-    }
-    return '';
+    return users.find((item: AV.Object) => item.get('objectId') === playerId);
   }
 
   return (
-    <div>
+    <div className="rank-wrap">
       <Table dataSource={list} columns={columns} pagination={false} />
     </div>
   );

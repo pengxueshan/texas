@@ -11,6 +11,8 @@ export default function Photo() {
     getPics();
   }, []);
 
+  const user = AV.User.current();
+
   function handleBeforeUpload(file: File, files: File[]): boolean {
     files.forEach((f) => {
       let avFile = new AV.File(f.name, f);
@@ -40,15 +42,18 @@ export default function Photo() {
 
   return (
     <div className="page photo">
-      <div className="upload-wrap">
-        <Upload
-          beforeUpload={handleBeforeUpload}
-          showUploadList={false}
-          multiple={true}
-        >
-          <Button>上传图片</Button>
-        </Upload>
-      </div>
+      {user ? (
+        <div className="upload-wrap">
+          <Upload
+            beforeUpload={handleBeforeUpload}
+            showUploadList={false}
+            multiple={true}
+          >
+            <Button>上传图片</Button>
+          </Upload>
+        </div>
+      ) : null}
+
       <div className="pics">
         {pics.map((gamePic: AV.Object) => {
           return (
@@ -61,7 +66,13 @@ export default function Photo() {
         })}
       </div>
       <div className="spin-wrap">
-        {isLoading ? <Spin /> : <span className="link-style" onClick={getPics}>加载更多</span>}
+        {isLoading ? (
+          <Spin />
+        ) : (
+          <span className="link-style" onClick={getPics}>
+            加载更多
+          </span>
+        )}
       </div>
     </div>
   );

@@ -1,0 +1,26 @@
+.page.profile {
+  padding: 60px;
+  .row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .label {
+    margin-right: 16px;
+    line-height: 32px;
+    width: 100px;
+  }
+  .content {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    color: #000;
+  }
+  .edit-wrap {
+    margin-left: 16px;
+    cursor: pointer;
+  }
+  .avatar-wrap {
+    margin-right: 16px;
+  }
+}
