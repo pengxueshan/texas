@@ -1,0 +1,11 @@
+.auth-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50%;
+  margin: 0 auto;
+  height: calc(100vh - 120px);
+  button {
+    margin-left: 16px;
+  }
+}

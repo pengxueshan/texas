@@ -13,6 +13,8 @@ import Home from '../../pages/Home';
 import Photo from '../../pages/Photo';
 import Message from '../../pages/Message';
 import Profile from '../../pages/Profile';
+import PrivateRoute from '../PrivateRoute';
+import Auth from '../../pages/Auth';
 
 interface State extends ContextType {
   list: [];
@@ -50,15 +52,23 @@ export default class App extends Component {
     });
   };
 
+  setIsAuthenticated = (isAuth: boolean) => {
+    this.setState({
+      isAuthenticated: isAuth,
+    });
+  };
+
   state: State = {
     users: [],
     rounds: [],
     roundUserInfo: [],
     showSession: false,
+    isAuthenticated: false,
     setUsers: this.setUsers,
     setRounds: this.setRounds,
     setRoundUserInfo: this.setRoundUserInfo,
     setShowSession: this.setShowSession,
+    setIsAuthenticated: this.setIsAuthenticated,
 
     list: [],
   };
@@ -159,6 +169,8 @@ export default class App extends Component {
       setRoundUserInfo,
       setShowSession,
       list,
+      isAuthenticated,
+      setIsAuthenticated,
     } = this.state;
     return (
       <div className="app">
@@ -172,24 +184,29 @@ export default class App extends Component {
             setRounds,
             setRoundUserInfo,
             setShowSession,
+            isAuthenticated,
+            setIsAuthenticated,
           }}
         >
           <Router>
-            <TopBar />
+            {isAuthenticated ? <TopBar /> : null}
             {/* <Header /> */}
             <Switch>
-              <Route path="/photo">
+              <PrivateRoute path="/photo">
                 <Photo />
-              </Route>
-              <Route path="/message">
+              </PrivateRoute>
+              <PrivateRoute path="/message">
                 <Message />
-              </Route>
-              <Route path="/profile">
+              </PrivateRoute>
+              <PrivateRoute path="/profile">
                 <Profile />
+              </PrivateRoute>
+              <Route path="/auth">
+                <Auth />
               </Route>
-              <Route path="/">
+              <PrivateRoute path="/">
                 <Home list={list} onAddDone={this.handleAddDone} />
-              </Route>
+              </PrivateRoute>
             </Switch>
           </Router>
         </AppContext.Provider>
