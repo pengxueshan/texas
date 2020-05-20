@@ -1,5 +1,4 @@
-import React, { Component } from 'react';
-import Header from '../Header';
+import React, { Component, lazy, Suspense } from 'react';
 import './app.scss';
 import 'antd/dist/antd.css';
 import AppContext, { ContextType } from '../../store/context';
@@ -9,12 +8,13 @@ import Big from 'big.js';
 import { ListItem } from '../List';
 import TopBar from '../TopBar';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
-import Home from '../../pages/Home';
-import Photo from '../../pages/Photo';
-import Message from '../../pages/Message';
-import Profile from '../../pages/Profile';
-import PrivateRoute from '../PrivateRoute';
-import Auth from '../../pages/Auth';
+
+const Message = lazy(() => import('../../pages/Message'));
+const Profile = lazy(() => import('../../pages/Profile'));
+const PrivateRoute = lazy(() => import('../PrivateRoute'));
+const Auth = lazy(() => import('../../pages/Auth'));
+const Home = lazy(() => import('../../pages/Home'));
+const Photo = lazy(() => import('../../pages/Photo'));
 
 interface State extends ContextType {
   list: [];
@@ -191,23 +191,25 @@ export default class App extends Component {
           <Router>
             {isAuthenticated ? <TopBar /> : null}
             {/* <Header /> */}
-            <Switch>
-              <PrivateRoute path="/photo">
-                <Photo />
-              </PrivateRoute>
-              <PrivateRoute path="/message">
-                <Message />
-              </PrivateRoute>
-              <PrivateRoute path="/profile">
-                <Profile />
-              </PrivateRoute>
-              <Route path="/auth">
-                <Auth />
-              </Route>
-              <PrivateRoute path="/">
-                <Home list={list} onAddDone={this.handleAddDone} />
-              </PrivateRoute>
-            </Switch>
+            <Suspense fallback={<div>Loading...</div>}>
+              <Switch>
+                <PrivateRoute path="/photo">
+                  <Photo />
+                </PrivateRoute>
+                <PrivateRoute path="/message">
+                  <Message />
+                </PrivateRoute>
+                <PrivateRoute path="/profile">
+                  <Profile />
+                </PrivateRoute>
+                <Route path="/auth">
+                  <Auth />
+                </Route>
+                <PrivateRoute path="/">
+                  <Home list={list} onAddDone={this.handleAddDone} />
+                </PrivateRoute>
+              </Switch>
+            </Suspense>
           </Router>
         </AppContext.Provider>
       </div>
