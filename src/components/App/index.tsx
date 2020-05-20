@@ -8,10 +8,10 @@ import Big from 'big.js';
 import { ListItem } from '../List';
 import TopBar from '../TopBar';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import PrivateRoute from '../PrivateRoute';
 
 const Message = lazy(() => import('../../pages/Message'));
 const Profile = lazy(() => import('../../pages/Profile'));
-const PrivateRoute = lazy(() => import('../PrivateRoute'));
 const Auth = lazy(() => import('../../pages/Auth'));
 const Home = lazy(() => import('../../pages/Home'));
 const Photo = lazy(() => import('../../pages/Photo'));
