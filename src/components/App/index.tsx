@@ -1,6 +1,4 @@
 import React, { Component, lazy, Suspense } from 'react';
-import './app.scss';
-import 'antd/dist/antd.css';
 import AppContext, { ContextType } from '../../store/context';
 import AV from 'leancloud-storage';
 import _ from 'lodash';
@@ -9,6 +7,10 @@ import { ListItem } from '../List';
 import TopBar from '../TopBar';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import PrivateRoute from '../PrivateRoute';
+import { Spin } from 'antd';
+
+import './app.scss';
+import 'antd/dist/antd.css';
 
 const Message = lazy(() => import('../../pages/Message'));
 const Profile = lazy(() => import('../../pages/Profile'));
@@ -190,8 +192,19 @@ export default class App extends Component {
         >
           <Router>
             {isAuthenticated ? <TopBar /> : null}
-            {/* <Header /> */}
-            <Suspense fallback={<div>Loading...</div>}>
+            <Suspense
+              fallback={
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Spin />
+                </div>
+              }
+            >
               <Switch>
                 <PrivateRoute path="/photo">
                   <Photo />

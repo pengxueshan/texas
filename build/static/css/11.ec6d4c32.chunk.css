@@ -1,2 +1,0 @@
-.message-wrap{display:flex;flex-direction:column;height:calc(100vh - 60px);justify-content:center;align-items:center}.message-wrap .messages{flex:1 1;padding:16px;overflow:hidden;overflow-y:auto}.message-wrap .message-item{margin-bottom:16px}.message-wrap .message-item .username{margin-right:8px;color:#1890ff}.message-wrap .send-wrap{display:flex;height:60px}.message-wrap .send-wrap button{height:100%}
-/*# sourceMappingURL=11.ec6d4c32.chunk.css.map */
