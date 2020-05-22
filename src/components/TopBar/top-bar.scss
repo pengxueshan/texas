@@ -11,7 +11,8 @@
   z-index: 100;
 
   .user-section {
-    span, a {
+    > span,
+    > a {
       margin-right: 16px;
     }
   }

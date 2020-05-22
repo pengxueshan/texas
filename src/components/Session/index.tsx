@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent, useContext } from 'react';
+import React, { useState, ChangeEvent, useContext, useRef } from 'react';
 import { Modal, Input, Button, message } from 'antd';
 import './session.scss';
 import AV from 'leancloud-storage';
@@ -14,6 +14,8 @@ export default function Session({ visible }: Props) {
   const [mobile, setMobile] = useState('');
   const [verifyCode, setVerifyCode] = useState('');
   const [verifyCount, setVerifyCount] = useState(0);
+  const countRef = useRef(verifyCount);
+  countRef.current = verifyCount;
   const [inviteCode, setInviteCodeChange] = useState('');
   const context = useContext(AppContext);
 
@@ -72,13 +74,12 @@ export default function Session({ visible }: Props) {
   }
 
   function startCount() {
-    if (verifyCount > 0) return;
-    countDown();
+    setTimeout(countDown, 1000);
   }
 
   function countDown() {
-    if (verifyCount <= 0) return;
-    setVerifyCount(verifyCount - 1);
+    if (countRef.current <= 0) return;
+    setVerifyCount(countRef.current - 1);
     setTimeout(countDown, 1000);
   }
 

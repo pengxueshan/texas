@@ -19,17 +19,29 @@ export default function TopBar() {
       title: '确定退出登录吗？',
       onOk() {
         return AV.User.logOut().then(() => {
-          window.location.reload();
+          window.location.href = '/';
         });
       },
     });
   }
 
   const currentUser = AV.User.current();
-  let avatar;
+  let avatar: AV.Object;
   if (currentUser) {
     avatar = currentUser.get('avatar');
   }
+
+  const renderAvatar = () => {
+    return (
+      <Link key="setting" to="/profile">
+        {avatar ? (
+          <Avatar size={32} src={avatar.get('url')} />
+        ) : (
+          <Avatar size={32} icon={<UserOutlined />} />
+        )}
+      </Link>
+    );
+  };
 
   return (
     <div className="top-bar">
@@ -53,15 +65,7 @@ export default function TopBar() {
           </span>
         ) : (
           [
-            avatar ? (
-              <Avatar size={32} src={avatar.get('url')} />
-            ) : (
-              <Avatar size={32} icon={<UserOutlined />} />
-            ),
-            // <span key="user-name">{currentUser.getUsername()}</span>,
-            <Link key="setting" to="/profile">
-              设置
-            </Link>,
+            renderAvatar(),
             <span
               key="logout"
               className="link-style"

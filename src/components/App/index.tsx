@@ -174,6 +174,7 @@ export default class App extends Component {
       isAuthenticated,
       setIsAuthenticated,
     } = this.state;
+    const isDev = !process.env.production;
     return (
       <div className="app">
         <AppContext.Provider
@@ -191,7 +192,7 @@ export default class App extends Component {
           }}
         >
           <Router>
-            {isAuthenticated ? <TopBar /> : null}
+            {isAuthenticated || isDev ? <TopBar /> : null}
             <Suspense
               fallback={
                 <div
