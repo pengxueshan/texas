@@ -174,7 +174,7 @@ export default class App extends Component {
       isAuthenticated,
       setIsAuthenticated,
     } = this.state;
-    const isDev = !process.env.production;
+    const isDev = process.env.NODE_ENV === 'development';
     return (
       <div className="app">
         <AppContext.Provider

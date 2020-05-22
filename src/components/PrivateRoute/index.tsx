@@ -8,7 +8,7 @@ interface Props extends RouteProps {
 
 export default function PrivateRoute({ children, ...rest }: Props) {
   const context = useContext(AppContext);
-  const isDev = !process.env.production;
+  const isDev = process.env.NODE_ENV === 'development';
   return (
     <Route
       {...rest}
