@@ -11,7 +11,7 @@ interface AddDoneFunc {
 
 interface Props {
   onAddDone: AddDoneFunc;
-  list: []
+  list: [];
 }
 
 export default function Home({ onAddDone, list }: Props) {
@@ -28,7 +28,8 @@ export default function Home({ onAddDone, list }: Props) {
         <Button
           type="primary"
           onClick={() => {
-            setShowAddModal(true);
+            setIsModify(false);
+            setShowDetailsModal(true);
           }}
         >
           明细
@@ -37,8 +38,7 @@ export default function Home({ onAddDone, list }: Props) {
           <Button
             type="primary"
             onClick={() => {
-              setIsModify(false);
-              setShowDetailsModal(true);
+              setShowAddModal(true);
             }}
           >
             增加记录

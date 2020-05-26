@@ -75,13 +75,15 @@ export default function AddRoundModal({
         findUser.set('amount', userAmount[userId]);
         allRoundUserInfos.push(findUser);
       });
-      return Promise.all([r.save(), AV.Object.saveAll(allRoundUserInfos)]).then(() => {
-        if (onOk) {
-          onOk();
-        }
-      }).catch(e => {
-        message.error(e.message);
-      });
+      return Promise.all([r.save(), AV.Object.saveAll(allRoundUserInfos)])
+        .then(() => {
+          if (onOk) {
+            onOk();
+          }
+        })
+        .catch((e) => {
+          message.error(e.message);
+        });
     } else {
       const Round = AV.Object.extend('Round');
       const round = new Round();
@@ -99,13 +101,15 @@ export default function AddRoundModal({
         roundUserInfo.set('amount', userAmount[userId]);
         allRoundUserInfos.push(roundUserInfo);
       });
-      return AV.Object.saveAll(allRoundUserInfos).then(() => {
-        if (onOk) {
-          onOk();
-        }
-      }).catch(e => {
-        message.error(e.message);
-      });
+      return AV.Object.saveAll(allRoundUserInfos)
+        .then(() => {
+          if (onOk) {
+            onOk();
+          }
+        })
+        .catch((e) => {
+          message.error(e.message);
+        });
     }
   }
 
@@ -138,12 +142,15 @@ export default function AddRoundModal({
         key: 'dateTime',
         ellipsis: true,
         render: () => {
+          console.log('dateTime::', dateTime);
           return (
             <div style={{ width: '150px' }}>
               <DatePicker
                 onChange={handleDateTimeChange}
                 format="YYYY/MM/DD"
-                value={moment(dateTime, 'YYYY/MM/DD')}
+                value={
+                  (dateTime && moment(dateTime, 'YYYY/MM/DD')) || undefined
+                }
               />
             </div>
           );
