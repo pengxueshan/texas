@@ -17,6 +17,7 @@ const Profile = lazy(() => import('../../pages/Profile'));
 const Auth = lazy(() => import('../../pages/Auth'));
 const Home = lazy(() => import('../../pages/Home'));
 const Photo = lazy(() => import('../../pages/Photo'));
+const Encrypt = lazy(() => import('../../pages/Encrypt'));
 
 interface State extends ContextType {
   list: [];
@@ -216,6 +217,9 @@ export default class App extends Component {
                 <PrivateRoute path="/profile">
                   <Profile />
                 </PrivateRoute>
+                <Route path="/encrypt">
+                  <Encrypt />
+                </Route>
                 <Route path="/auth">
                   <Auth />
                 </Route>
