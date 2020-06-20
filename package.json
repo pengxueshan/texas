@@ -17,6 +17,7 @@
     "@types/react-dom": "^16.9.8",
     "@types/react-router-dom": "^5.1.5",
     "antd": "^4.1.4",
+    "axios": "^0.19.2",
     "big.js": "^5.2.2",
     "crypto-js": "^4.0.0",
     "diffie-hellman": "^5.0.3",
