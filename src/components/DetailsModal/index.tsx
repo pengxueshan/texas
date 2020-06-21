@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { Modal, Table } from 'antd';
 import AppContext from '../../store/context';
-import AV from 'leancloud-storage';
+import {Player, Round} from '../../utils/types';
 
 interface Props {
   onModify: OnModifyFunc;
@@ -32,7 +32,7 @@ export default function DetailsModal({
         title: '场次',
         key: 'roundNO',
         ellipsis: true,
-        render: (text: string, record: AV.Object, index: number) => {
+        render: (text: string, record: Round, index: number) => {
           return index + 1;
         },
       },
@@ -40,38 +40,38 @@ export default function DetailsModal({
         title: '日期',
         key: 'dateTime',
         ellipsis: true,
-        render: (text: string, record: AV.Object) => {
-          return record.get('dateTime');
+        render: (text: string, record: Round) => {
+          return record.date;
         },
       },
       {
         title: '杠杆比例',
         key: 'leverage',
         ellipsis: true,
-        render: (text: string, record: AV.Object) => {
-          return record.get('leverage');
+        render: (text: string, record: Round) => {
+          return record.leverage;
         },
       },
     ];
-    let users: AV.Object[] = context.users;
+    let players = context.players;
     ret = ret.concat(
-      users.map((user: AV.Object) => {
+      players.map((player) => {
         return {
-          title: user.get('name'),
-          key: user.get('objectId'),
+          title: player.name,
+          key: player.id,
           ellipsis: true,
-          render: (text: string, record: AV.Object, index: number) => {
-            return getUserRoundInfo(user.get('objectId'), index);
+          render: (text: string, record: Round, index: number) => {
+            return getRoundInfo(player.id, index);
           },
         };
       })
     );
-    const currentUser = AV.User.current();
+    const currentUser = false;
     if (currentUser) {
       ret = ret.concat({
         title: '操作',
         key: 'opt',
-        render: (text: string, record: AV.Object, index: number) => {
+        render: (text: string, record: Round, index: number) => {
           return (
             <div className="details-opt">
               <span onClick={() => handleModifyClick(index)}>修改</span>
@@ -87,19 +87,11 @@ export default function DetailsModal({
     onModify(index);
   }
 
-  function getUserRoundInfo(userId: string, index: number) {
-    let { roundUserInfo } = context;
-    let list: AV.Object[] = roundUserInfo[index];
-    if (list) {
-      let info = list.find((item: AV.Object) => {
-        return item.get('player').get('objectId') === userId;
-      });
-      return (info && info.get('amount')) || '';
-    }
+  function getRoundInfo(playerId: number, index: number) {
     return '';
   }
 
-  let rounds: AV.Object[] = context.rounds;
+  let rounds = context.rounds;
   return (
     <Modal visible={visible} onCancel={onCancel} onOk={onOk} width={1200}>
       <div className="details-round-wrap">

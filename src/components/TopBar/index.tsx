@@ -2,7 +2,6 @@ import React, { useContext } from 'react';
 import './top-bar.scss';
 import Session from '../Session';
 import AppContext from '../../store/context';
-import AV from 'leancloud-storage';
 import { Modal, Avatar } from 'antd';
 import { Link } from 'react-router-dom';
 import { UserOutlined } from '@ant-design/icons';
@@ -18,24 +17,21 @@ export default function TopBar() {
     Modal.confirm({
       title: '确定退出登录吗？',
       onOk() {
-        return AV.User.logOut().then(() => {
-          window.location.href = '/';
-        });
+        // return AV.User.logOut().then(() => {
+        //   window.location.href = '/';
+        // });
       },
     });
   }
 
-  const currentUser = AV.User.current();
-  let avatar: AV.Object;
-  if (currentUser) {
-    avatar = currentUser.get('avatar');
-  }
+  let avatar = '';
+  let currentUser = '';
 
   const renderAvatar = () => {
     return (
       <Link key="setting" to="/profile">
         {avatar ? (
-          <Avatar size={32} src={avatar.get('url')} />
+          <Avatar size={32} src={avatar} />
         ) : (
           <Avatar size={32} icon={<UserOutlined />} />
         )}

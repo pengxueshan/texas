@@ -3,7 +3,7 @@ import { Button } from 'antd';
 import List from '../components/List';
 import AddRoundModal from '../components/AddRoundModal';
 import DetailsModal from '../components/DetailsModal';
-import AV from 'leancloud-storage';
+import AddPlayerModal from '../components/AddPlayerModal';
 
 interface AddDoneFunc {
   (): void;
@@ -18,13 +18,22 @@ export default function Home({ onAddDone, list }: Props) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [isModify, setIsModify] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showAddPlayerModal, setShowAddPlayerModal] = useState(false);
   const [modifyIndex, setModifyIndex] = useState(-1);
 
-  const currentUser = AV.User.current();
+  const currentUser = false;
   return (
     <div className="page home">
       <List list={list} />
       <div className="btn-wrap">
+        <Button
+          type="primary"
+          onClick={() => {
+            setShowAddPlayerModal(true);
+          }}
+        >
+          添加选手
+        </Button>
         <Button
           type="primary"
           onClick={() => {
@@ -34,16 +43,14 @@ export default function Home({ onAddDone, list }: Props) {
         >
           明细
         </Button>
-        {currentUser ? (
-          <Button
-            type="primary"
-            onClick={() => {
-              setShowAddModal(true);
-            }}
-          >
-            增加记录
-          </Button>
-        ) : null}
+        <Button
+          type="primary"
+          onClick={() => {
+            setShowAddModal(true);
+          }}
+        >
+          增加记录
+        </Button>
       </div>
       <AddRoundModal
         visible={showAddModal}
@@ -70,6 +77,15 @@ export default function Home({ onAddDone, list }: Props) {
           setIsModify(true);
           setShowDetailsModal(false);
           setShowAddModal(true);
+        }}
+      />
+      <AddPlayerModal
+        visible={showAddPlayerModal}
+        onOk={() => {
+          setShowAddPlayerModal(false);
+        }}
+        onCancel={() => {
+          setShowAddPlayerModal(false);
         }}
       />
     </div>

@@ -1,30 +1,30 @@
 import React from 'react';
-import AV from 'leancloud-storage';
+import { Player, Round } from '../utils/types';
 
 export interface ContextType {
-  users: AV.Object[];
-  rounds: AV.Object[];
-  roundUserInfo: AV.Object[][];
+  players: Player[];
+  rounds: Round[];
   showSession: boolean;
-  setUsers: Function;
+  setPlayers: Function;
   setRounds: Function;
-  setRoundUserInfo: Function;
   setShowSession: Function;
   isAuthenticated: boolean;
   setIsAuthenticated: Function;
+  getPlayers: Function;
+  getRounds: Function;
 }
 
 export const defaultContext: ContextType = {
-  users: [],
+  players: [],
   rounds: [],
-  roundUserInfo: [],
   showSession: false,
-  setUsers: () => { },
-  setRounds: () => { },
-  setRoundUserInfo: () => { },
-  setShowSession: () => { },
+  setPlayers: () => {},
+  setRounds: () => {},
+  setShowSession: () => {},
   isAuthenticated: false,
-  setIsAuthenticated: () => { }
+  setIsAuthenticated: () => {},
+  getPlayers: () => {},
+  getRounds: () => {},
 };
 
 export default React.createContext(defaultContext);

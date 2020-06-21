@@ -2,7 +2,9 @@ import React, { useState, useContext, useEffect } from 'react';
 import { Modal, InputNumber, DatePicker, Table, message } from 'antd';
 import AppContext from '../../store/context';
 import AV from 'leancloud-storage';
-import moment from 'moment';
+import moment from 'moment'
+import { Player } from '../../utils/types';
+import {addRound} from '../../api/round';
 
 export interface Props {
   isModify?: boolean;
@@ -25,7 +27,7 @@ export default function AddRoundModal({
   onCancel,
 }: Props) {
   const context = useContext(AppContext);
-  let { rounds, roundUserInfo } = context;
+  let { rounds } = context;
   const [list, setList] = useState([{ roundNO: rounds.length + 1 }]);
   const [dateTime, setDateTime] = useState('');
   const [leverage, setLeverage] = useState(0.1);
@@ -33,83 +35,101 @@ export default function AddRoundModal({
 
   useEffect(() => {
     if (isModify) {
-      let list: AV.Object[] = roundUserInfo[roundIndex];
-      let round: AV.Object = rounds[roundIndex];
-      let amount: AmountMap = {};
-      if (list) {
-        list.forEach((item: AV.Object) => {
-          amount[item.get('player').get('objectId')] = item.get('amount');
-        });
-      }
-      setList([{ roundNO: roundIndex + 1 }]);
-      setLeverage(round.get('leverage'));
-      setDateTime(round.get('dateTime'));
-      setUserAmount(amount);
+      // let list: AV.Object[] = roundUserInfo[roundIndex];
+      // let round: AV.Object = rounds[roundIndex];
+      // let amount: AmountMap = {};
+      // if (list) {
+      //   list.forEach((item: AV.Object) => {
+      //     amount[item.get('player').get('objectId')] = item.get('amount');
+      //   });
+      // }
+      // setList([{ roundNO: roundIndex + 1 }]);
+      // setLeverage(round.get('leverage'));
+      // setDateTime(round.get('dateTime'));
+      // setUserAmount(amount);
     }
-  }, [isModify, roundUserInfo, roundIndex, rounds]);
+  }, [isModify, roundIndex, rounds]);
 
   function handleOk() {
     if (isModify) {
-      let round: AV.Object = context.rounds[roundIndex];
-      let roundUserInfo: AV.Object[] = context.roundUserInfo[roundIndex];
-      const r = AV.Object.createWithoutData('Round', round.get('objectId'));
-      r.set('dateTime', dateTime);
-      r.set('leverage', leverage);
-      let allRoundUserInfos: any[] = [];
-      Object.keys(userAmount).forEach((userId: string) => {
-        let info = roundUserInfo.find((item: AV.Object) => {
-          return item.get('player').get('objectId') === userId;
-        });
-        let findUser;
-        if (info) {
-          findUser = info;
-        } else {
-          const user = context.users.find(
-            (item: AV.Object) => item.get('objectId') === userId
-          );
-          const RoundUserInfo = AV.Object.extend('RoundUserInfo');
-          findUser = new RoundUserInfo();
-          findUser.set('round', r);
-          findUser.set('player', user);
-        }
-        findUser.set('amount', userAmount[userId]);
-        allRoundUserInfos.push(findUser);
-      });
-      return Promise.all([r.save(), AV.Object.saveAll(allRoundUserInfos)])
-        .then(() => {
-          if (onOk) {
-            onOk();
-          }
-        })
-        .catch((e) => {
-          message.error(e.message);
-        });
+      // let round: AV.Object = context.rounds[roundIndex];
+      // let roundUserInfo: AV.Object[] = context.roundUserInfo[roundIndex];
+      // const r = AV.Object.createWithoutData('Round', round.get('objectId'));
+      // r.set('dateTime', dateTime);
+      // r.set('leverage', leverage);
+      // let allRoundUserInfos: any[] = [];
+      // Object.keys(userAmount).forEach((userId: string) => {
+      //   let info = roundUserInfo.find((item: AV.Object) => {
+      //     return item.get('player').get('objectId') === userId;
+      //   });
+      //   let findUser;
+      //   if (info) {
+      //     findUser = info;
+      //   } else {
+      //     const user = context.users.find(
+      //       (item: AV.Object) => item.get('objectId') === userId
+      //     );
+      //     const RoundUserInfo = AV.Object.extend('RoundUserInfo');
+      //     findUser = new RoundUserInfo();
+      //     findUser.set('round', r);
+      //     findUser.set('player', user);
+      //   }
+      //   findUser.set('amount', userAmount[userId]);
+      //   allRoundUserInfos.push(findUser);
+      // });
+      // return Promise.all([r.save(), AV.Object.saveAll(allRoundUserInfos)])
+      //   .then(() => {
+      //     if (onOk) {
+      //       onOk();
+      //     }
+      //   })
+      //   .catch((e) => {
+      //     message.error(e.message);
+      //   });
     } else {
-      const Round = AV.Object.extend('Round');
-      const round = new Round();
-      round.set('dateTime', dateTime);
-      round.set('leverage', leverage);
-      const RoundUserInfo = AV.Object.extend('RoundUserInfo');
-      let allRoundUserInfos: AV.Object[] = [];
-      Object.keys(userAmount).forEach((userId) => {
-        const roundUserInfo = new RoundUserInfo();
-        const user = context.users.find(
-          (item: AV.Object) => item.get('objectId') === userId
-        );
-        roundUserInfo.set('round', round);
-        roundUserInfo.set('player', user);
-        roundUserInfo.set('amount', userAmount[userId]);
-        allRoundUserInfos.push(roundUserInfo);
+      // const Round = AV.Object.extend('Round');
+      // const round = new Round();
+      // round.set('dateTime', dateTime);
+      // round.set('leverage', leverage);
+      // const RoundUserInfo = AV.Object.extend('RoundUserInfo');
+      // let allRoundUserInfos: AV.Object[] = [];
+      // Object.keys(userAmount).forEach((userId) => {
+      //   const roundUserInfo = new RoundUserInfo();
+      //   const user = context.users.find(
+      //     (item: AV.Object) => item.get('objectId') === userId
+      //   );
+      //   roundUserInfo.set('round', round);
+      //   roundUserInfo.set('player', user);
+      //   roundUserInfo.set('amount', userAmount[userId]);
+      //   allRoundUserInfos.push(roundUserInfo);
+      // });
+      // return AV.Object.saveAll(allRoundUserInfos)
+      //   .then(() => {
+      //     if (onOk) {
+      //       onOk();
+      //     }
+      //   })
+      //   .catch((e) => {
+      //     message.error(e.message);
+      //   });
+      const datas = Object.keys(userAmount).map(playerId => {
+        return {
+          id: playerId,
+          amount: userAmount[playerId]
+        };
       });
-      return AV.Object.saveAll(allRoundUserInfos)
-        .then(() => {
-          if (onOk) {
-            onOk();
-          }
-        })
-        .catch((e) => {
-          message.error(e.message);
-        });
+      const params = {
+        date: dateTime,
+        leverage,
+        playerInfo: datas
+      };
+      addRound(params).then(() => {
+        if (onOk) {
+          onOk();
+        }
+      }).catch(e => {
+        message.error(e.message);
+      });
     }
   }
 
@@ -125,12 +145,12 @@ export default function AddRoundModal({
     setLeverage(v || 0.1);
   }
 
-  function handleAmountChange(v: number | undefined, user: AV.Object) {
+  function handleAmountChange(v: number | undefined, player: Player) {
     v = v ? +v : 0;
     let tmp = {
       ...userAmount,
     };
-    tmp[user.get('objectId')] = v;
+    tmp[player.id] = v;
     setUserAmount(tmp);
   }
 
@@ -168,16 +188,16 @@ export default function AddRoundModal({
       },
     ];
     return ret.concat(
-      context.users.map((user: AV.Object) => {
+      context.players.map((player: Player) => {
         return {
-          title: user.get('name'),
-          key: user.get('objectId'),
+          title: player.name,
+          key: `${player.id}`,
           ellipsis: true,
           render: () => {
             return (
               <InputNumber
-                onChange={(v) => handleAmountChange(v, user)}
-                value={userAmount[user.get('objectId')]}
+                onChange={(v) => handleAmountChange(v, player)}
+                value={userAmount[player.id]}
               />
             );
           },

@@ -1,13 +1,13 @@
 import React, { Component, lazy, Suspense } from 'react';
 import AppContext, { ContextType } from '../../store/context';
-import AV from 'leancloud-storage';
-import _ from 'lodash';
-import Big from 'big.js';
-import { ListItem } from '../List';
 import TopBar from '../TopBar';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import PrivateRoute from '../PrivateRoute';
 import { Spin } from 'antd';
+
+import { Player, Round, RankListData } from '../../utils/types';
+import { getPlayers } from '../../api/player';
+import { getRankList, getRounds } from '../../api/round';
 
 import './app.scss';
 import 'antd/dist/antd.css';
@@ -24,29 +24,20 @@ interface State extends ContextType {
 }
 
 interface Map {
-  [key: string]: ListItem;
+  [key: string]: RankListData;
 }
 
 export default class App extends Component {
-  setUsers = (list: AV.Queriable[]) => {
+  setPlayers = (list: Player[]) => {
     this.setState({
-      users: list,
+      players: list,
     });
   };
 
-  setRounds = (list: AV.Queriable[]) => {
+  setRounds = (list: Round[]) => {
     this.setState({
       rounds: list,
     });
-  };
-
-  setRoundUserInfo = (list: AV.Queriable[][]) => {
-    this.setState(
-      {
-        roundUserInfo: list,
-      },
-      this.calcList
-    );
   };
 
   setShowSession = (isShow?: boolean) => {
@@ -61,135 +52,78 @@ export default class App extends Component {
     });
   };
 
+  getPlayers = async () => {
+    const players = await getPlayers();
+    this.setPlayers(players);
+  };
+
+  getRounds = async () => {
+    const rounds = await getRounds();
+    this.setRounds(rounds);
+  };
+
   state: State = {
-    users: [],
+    players: [],
     rounds: [],
-    roundUserInfo: [],
     showSession: false,
     isAuthenticated: false,
-    setUsers: this.setUsers,
+    setPlayers: this.setPlayers,
     setRounds: this.setRounds,
-    setRoundUserInfo: this.setRoundUserInfo,
     setShowSession: this.setShowSession,
     setIsAuthenticated: this.setIsAuthenticated,
+    getPlayers: this.getPlayers,
+    getRounds: this.getRounds,
 
     list: [],
   };
 
   componentDidMount() {
-    this.getUsers();
-    this.getAllRounds();
+    this.getPlayers();
+    this.getRounds();
+    this.getRankList();
   }
 
-  getUsers = () => {
-    const query = new AV.Query('Player');
-    query.find().then((players: AV.Queriable[]) => {
-      this.setUsers(players);
-    });
-  };
-
-  getAllRounds = () => {
-    const rounds = new AV.Query('Round');
-    rounds.find().then((res) => {
-      Promise.all(
-        res.map((round) => {
-          return this.getRoundInfo(round);
-        })
-      ).then((roundInfos) => {
-        this.setRounds(res);
-        this.setRoundUserInfo(roundInfos);
+  getRankList = () => {
+    getRankList().then(res => {
+      this.setState({
+        list: res
       });
     });
-  };
-
-  getRoundInfo = (round: AV.Queriable) => {
-    const query = new AV.Query('RoundUserInfo');
-    query.equalTo('round', round);
-    return query.find();
   };
 
   handleAddDone = () => {
-    this.getAllRounds();
+    this.getRankList();
   };
-
-  calcList() {
-    let { roundUserInfo, rounds } = this.state;
-    let tmp: Map = {};
-    roundUserInfo.forEach((round: AV.Object[], index) => {
-      let leverage = rounds[index].get('leverage');
-      round.forEach((info) => {
-        let player = info.get('player');
-        let amount = info.get('amount');
-        amount = +amount;
-        let playerId = player.get('objectId');
-        let userRoundInfo = tmp[playerId];
-        if (!userRoundInfo) {
-          userRoundInfo = {
-            max: 0,
-            min: 0,
-            total: 0,
-            totalBalance: 0,
-            count: 0,
-            player,
-            currentLeverage: 0,
-          };
-        }
-        if (amount > userRoundInfo.max) {
-          userRoundInfo.max = amount;
-        }
-        if (amount < userRoundInfo.min) {
-          userRoundInfo.min = amount;
-        }
-        userRoundInfo.total = +new Big(userRoundInfo.total)
-          .plus(amount)
-          .valueOf();
-        userRoundInfo.totalBalance = +new Big(userRoundInfo.totalBalance)
-          .plus(new Big(amount).times(leverage))
-          .valueOf();
-        if (amount !== 0) {
-          userRoundInfo.count++;
-        }
-        tmp[playerId] = userRoundInfo;
-      });
-    });
-    let list = _.values(tmp);
-    list.sort((a: ListItem, b: ListItem) => {
-      return b.totalBalance - a.totalBalance;
-    });
-    this.setState({
-      list,
-    });
-  }
 
   render() {
     let {
-      users,
+      players,
       rounds,
-      roundUserInfo,
       showSession,
-      setUsers,
+      setPlayers,
       setRounds,
-      setRoundUserInfo,
       setShowSession,
       list,
       isAuthenticated,
       setIsAuthenticated,
+      getPlayers,
+      getRounds
     } = this.state;
     const isDev = process.env.NODE_ENV === 'development';
     return (
       <div className="app">
         <AppContext.Provider
           value={{
-            users,
+            players,
             rounds,
-            roundUserInfo,
             showSession,
-            setUsers,
+            setPlayers,
             setRounds,
-            setRoundUserInfo,
             setShowSession,
             isAuthenticated,
             setIsAuthenticated,
+            getPlayers,
+            getRounds
           }}
         >
           <Router>
