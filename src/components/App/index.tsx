@@ -146,7 +146,8 @@ export default class App extends Component {
           }}
         >
           <Router>
-            {isAuthenticated || isDev ? <TopBar /> : null}
+            {/* {isAuthenticated || isDev ? <TopBar /> : null} */}
+            <TopBar />
             <Suspense
               fallback={
                 <div
