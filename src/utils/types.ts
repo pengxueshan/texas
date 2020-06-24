@@ -19,3 +19,14 @@ export interface RankListData {
   playNum: number;
   player: Player;
 }
+
+export interface RoundPlayerInfo {
+  id: number;
+  amount: number;
+  roundId: number;
+  playerId: number;
+}
+
+export interface RoundDetails extends Round {
+  players: RoundPlayerInfo[];
+}

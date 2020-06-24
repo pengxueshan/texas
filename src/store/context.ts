@@ -1,9 +1,10 @@
 import React from 'react';
-import { Player, Round } from '../utils/types';
+import { Player, Round, RoundDetails } from '../utils/types';
 
 export interface ContextType {
   players: Player[];
   rounds: Round[];
+  roundDetails: RoundDetails[];
   showSession: boolean;
   setPlayers: Function;
   setRounds: Function;
@@ -12,11 +13,13 @@ export interface ContextType {
   setIsAuthenticated: Function;
   getPlayers: Function;
   getRounds: Function;
+  setRoundDetails: Function;
 }
 
 export const defaultContext: ContextType = {
   players: [],
   rounds: [],
+  roundDetails: [],
   showSession: false,
   setPlayers: () => {},
   setRounds: () => {},
@@ -25,6 +28,7 @@ export const defaultContext: ContextType = {
   setIsAuthenticated: () => {},
   getPlayers: () => {},
   getRounds: () => {},
+  setRoundDetails: () => {},
 };
 
 export default React.createContext(defaultContext);

@@ -1,10 +1,9 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Modal, InputNumber, DatePicker, Table, message } from 'antd';
 import AppContext from '../../store/context';
-import AV from 'leancloud-storage';
-import moment from 'moment'
+import moment from 'moment';
 import { Player } from '../../utils/types';
-import {addRound} from '../../api/round';
+import { addRound, updateRound } from '../../api/round';
 
 export interface Props {
   isModify?: boolean;
@@ -35,101 +34,64 @@ export default function AddRoundModal({
 
   useEffect(() => {
     if (isModify) {
-      // let list: AV.Object[] = roundUserInfo[roundIndex];
-      // let round: AV.Object = rounds[roundIndex];
-      // let amount: AmountMap = {};
-      // if (list) {
-      //   list.forEach((item: AV.Object) => {
-      //     amount[item.get('player').get('objectId')] = item.get('amount');
-      //   });
-      // }
-      // setList([{ roundNO: roundIndex + 1 }]);
-      // setLeverage(round.get('leverage'));
-      // setDateTime(round.get('dateTime'));
-      // setUserAmount(amount);
+      const info = context.roundDetails[roundIndex];
+      let amount: AmountMap = {};
+      if (info.players) {
+        info.players.forEach((item) => {
+          amount[item.playerId] = item.amount;
+        });
+      }
+      setList([{ roundNO: roundIndex + 1 }]);
+      setLeverage(info.leverage);
+      setDateTime(info.date);
+      setUserAmount(amount);
     }
   }, [isModify, roundIndex, rounds]);
 
   function handleOk() {
     if (isModify) {
-      // let round: AV.Object = context.rounds[roundIndex];
-      // let roundUserInfo: AV.Object[] = context.roundUserInfo[roundIndex];
-      // const r = AV.Object.createWithoutData('Round', round.get('objectId'));
-      // r.set('dateTime', dateTime);
-      // r.set('leverage', leverage);
-      // let allRoundUserInfos: any[] = [];
-      // Object.keys(userAmount).forEach((userId: string) => {
-      //   let info = roundUserInfo.find((item: AV.Object) => {
-      //     return item.get('player').get('objectId') === userId;
-      //   });
-      //   let findUser;
-      //   if (info) {
-      //     findUser = info;
-      //   } else {
-      //     const user = context.users.find(
-      //       (item: AV.Object) => item.get('objectId') === userId
-      //     );
-      //     const RoundUserInfo = AV.Object.extend('RoundUserInfo');
-      //     findUser = new RoundUserInfo();
-      //     findUser.set('round', r);
-      //     findUser.set('player', user);
-      //   }
-      //   findUser.set('amount', userAmount[userId]);
-      //   allRoundUserInfos.push(findUser);
-      // });
-      // return Promise.all([r.save(), AV.Object.saveAll(allRoundUserInfos)])
-      //   .then(() => {
-      //     if (onOk) {
-      //       onOk();
-      //     }
-      //   })
-      //   .catch((e) => {
-      //     message.error(e.message);
-      //   });
+      const info = context.roundDetails[roundIndex];
+      const updateDatas = {
+        id: info.id,
+        date: dateTime,
+        leverage: leverage,
+        players: Object.keys(userAmount).map((playerId) => {
+          return {
+            amount: userAmount[playerId],
+            playerId,
+          };
+        }),
+      };
+      updateRound(updateDatas)
+        .then(() => {
+          if (onOk) {
+            onOk();
+          }
+        })
+        .catch((e) => {
+          message.error(e.message);
+        });
     } else {
-      // const Round = AV.Object.extend('Round');
-      // const round = new Round();
-      // round.set('dateTime', dateTime);
-      // round.set('leverage', leverage);
-      // const RoundUserInfo = AV.Object.extend('RoundUserInfo');
-      // let allRoundUserInfos: AV.Object[] = [];
-      // Object.keys(userAmount).forEach((userId) => {
-      //   const roundUserInfo = new RoundUserInfo();
-      //   const user = context.users.find(
-      //     (item: AV.Object) => item.get('objectId') === userId
-      //   );
-      //   roundUserInfo.set('round', round);
-      //   roundUserInfo.set('player', user);
-      //   roundUserInfo.set('amount', userAmount[userId]);
-      //   allRoundUserInfos.push(roundUserInfo);
-      // });
-      // return AV.Object.saveAll(allRoundUserInfos)
-      //   .then(() => {
-      //     if (onOk) {
-      //       onOk();
-      //     }
-      //   })
-      //   .catch((e) => {
-      //     message.error(e.message);
-      //   });
-      const datas = Object.keys(userAmount).map(playerId => {
+      const datas = Object.keys(userAmount).map((playerId) => {
         return {
           id: playerId,
-          amount: userAmount[playerId]
+          amount: userAmount[playerId],
         };
       });
       const params = {
         date: dateTime,
         leverage,
-        playerInfo: datas
+        playerInfo: datas,
       };
-      addRound(params).then(() => {
-        if (onOk) {
-          onOk();
-        }
-      }).catch(e => {
-        message.error(e.message);
-      });
+      addRound(params)
+        .then(() => {
+          if (onOk) {
+            onOk();
+          }
+        })
+        .catch((e) => {
+          message.error(e.message);
+        });
     }
   }
 
@@ -162,7 +124,6 @@ export default function AddRoundModal({
         key: 'dateTime',
         ellipsis: true,
         render: () => {
-          console.log('dateTime::', dateTime);
           return (
             <div style={{ width: '150px' }}>
               <DatePicker

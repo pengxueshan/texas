@@ -5,18 +5,18 @@ import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import PrivateRoute from '../PrivateRoute';
 import { Spin } from 'antd';
 
-import { Player, Round, RankListData } from '../../utils/types';
+import { Player, Round, RankListData, RoundDetails } from '../../utils/types';
 import { getPlayers } from '../../api/player';
-import { getRankList, getRounds } from '../../api/round';
+import { getRankList, getRounds, getRoundDetails } from '../../api/round';
 
 import './app.scss';
 import 'antd/dist/antd.css';
 
-const Message = lazy(() => import('../../pages/Message'));
-const Profile = lazy(() => import('../../pages/Profile'));
-const Auth = lazy(() => import('../../pages/Auth'));
+// const Message = lazy(() => import('../../pages/Message'));
+// const Profile = lazy(() => import('../../pages/Profile'));
+// const Auth = lazy(() => import('../../pages/Auth'));
 const Home = lazy(() => import('../../pages/Home'));
-const Photo = lazy(() => import('../../pages/Photo'));
+// const Photo = lazy(() => import('../../pages/Photo'));
 const Encrypt = lazy(() => import('../../pages/Encrypt'));
 
 interface State extends ContextType {
@@ -62,13 +62,26 @@ export default class App extends Component {
     this.setRounds(rounds);
   };
 
+  getRoundDetails = async () => {
+    const rounds = await getRoundDetails();
+    this.setRoundDetails(rounds);
+  };
+
+  setRoundDetails = (list: RoundDetails) => {
+    this.setState({
+      roundDetails: list,
+    });
+  };
+
   state: State = {
     players: [],
     rounds: [],
+    roundDetails: [],
     showSession: false,
     isAuthenticated: false,
     setPlayers: this.setPlayers,
     setRounds: this.setRounds,
+    setRoundDetails: this.setRoundDetails,
     setShowSession: this.setShowSession,
     setIsAuthenticated: this.setIsAuthenticated,
     getPlayers: this.getPlayers,
@@ -84,30 +97,34 @@ export default class App extends Component {
   }
 
   getRankList = () => {
-    getRankList().then(res => {
+    getRankList().then((res) => {
       this.setState({
-        list: res
+        list: res,
       });
     });
   };
 
   handleAddDone = () => {
     this.getRankList();
+    this.getRounds();
+    this.getRoundDetails();
   };
 
   render() {
     let {
       players,
       rounds,
+      roundDetails,
       showSession,
       setPlayers,
       setRounds,
+      setRoundDetails,
       setShowSession,
       list,
       isAuthenticated,
       setIsAuthenticated,
       getPlayers,
-      getRounds
+      getRounds,
     } = this.state;
     const isDev = process.env.NODE_ENV === 'development';
     return (
@@ -116,14 +133,16 @@ export default class App extends Component {
           value={{
             players,
             rounds,
+            roundDetails,
             showSession,
             setPlayers,
             setRounds,
+            setRoundDetails,
             setShowSession,
             isAuthenticated,
             setIsAuthenticated,
             getPlayers,
-            getRounds
+            getRounds,
           }}
         >
           <Router>
@@ -142,7 +161,7 @@ export default class App extends Component {
               }
             >
               <Switch>
-                <PrivateRoute path="/photo">
+                {/* <PrivateRoute path="/photo">
                   <Photo />
                 </PrivateRoute>
                 <PrivateRoute path="/message">
@@ -150,16 +169,19 @@ export default class App extends Component {
                 </PrivateRoute>
                 <PrivateRoute path="/profile">
                   <Profile />
-                </PrivateRoute>
+                </PrivateRoute> */}
                 <Route path="/encrypt">
                   <Encrypt />
                 </Route>
-                <Route path="/auth">
+                {/* <Route path="/auth">
                   <Auth />
-                </Route>
-                <PrivateRoute path="/">
+                </Route> */}
+                {/* <PrivateRoute path="/">
                   <Home list={list} onAddDone={this.handleAddDone} />
-                </PrivateRoute>
+                </PrivateRoute> */}
+                <Route path="/">
+                  <Home list={list} onAddDone={this.handleAddDone} />
+                </Route>
               </Switch>
             </Suspense>
           </Router>

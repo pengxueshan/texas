@@ -39,7 +39,7 @@ export default function Session({ visible }: Props) {
     setConfirmLoading(true);
     login({
       phoneNumber: `+86${mobile}`,
-      password,
+      password: MD5(password).toString().toLowerCase(),
     })
       .then((user) => {
         setConfirmLoading(false);
@@ -99,7 +99,7 @@ export default function Session({ visible }: Props) {
 
   return (
     <Modal
-      title="登录或注册"
+      title="登录"
       visible={visible}
       onOk={handleOk}
       onCancel={handleCancel}
@@ -115,9 +115,10 @@ export default function Session({ visible }: Props) {
         </div>
         <div className="form-row">
           <Input
-            placeholder="password"
+            placeholder="密码"
             value={password}
             onChange={handlePasswordChange}
+            type="password"
           />
         </div>
         {/* <div className="form-row">
@@ -130,13 +131,13 @@ export default function Session({ visible }: Props) {
             {getButtonText()}
           </Button>
         </div> */}
-        <div className="form-row">
+        {/* <div className="form-row">
           <Input
             placeholder="邀请码"
             value={inviteCode}
             onChange={handleInviteChange}
           />
-        </div>
+        </div> */}
       </div>
     </Modal>
   );

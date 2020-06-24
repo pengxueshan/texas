@@ -29,3 +29,23 @@ export async function getRankList(params: object = {}) {
     }
   });
 }
+
+export async function getRoundDetails(params: object = {}) {
+  return await request({
+    url: '/roundDetails',
+    method: 'post',
+    data: {
+      ...params
+    }
+  });
+}
+
+export async function updateRound(params: object = {}) {
+  return await request({
+    url: '/updateRound',
+    method: 'post',
+    data: {
+      ...params
+    }
+  });
+}

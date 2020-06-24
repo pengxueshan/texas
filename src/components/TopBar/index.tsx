@@ -46,12 +46,12 @@ export default function TopBar() {
           <li>
             <Link to="/">排行榜</Link>
           </li>
-          <li>
+          {/* <li>
             <Link to="/photo">精彩瞬间</Link>
           </li>
           <li>
             <Link to="/message">聊天室</Link>
-          </li>
+          </li> */}
         </ul>
       </nav>
       <div className="user-section">
