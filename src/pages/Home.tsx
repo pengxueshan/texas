@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { Component } from 'react';
 import { Button } from 'antd';
 import List from '../components/List';
 import AddRoundModal from '../components/AddRoundModal';
 import DetailsModal from '../components/DetailsModal';
 import AddPlayerModal from '../components/AddPlayerModal';
+import { connect } from 'react-redux';
+import { StoreType } from '../store/reducer';
+import { WinTimes } from '../utils/types';
 
 interface AddDoneFunc {
   (): void;
@@ -12,82 +15,114 @@ interface AddDoneFunc {
 interface Props {
   onAddDone: AddDoneFunc;
   list: [];
+  winTimes: WinTimes;
 }
 
-export default function Home({ onAddDone, list }: Props) {
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [isModify, setIsModify] = useState(false);
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [showAddPlayerModal, setShowAddPlayerModal] = useState(false);
-  const [modifyIndex, setModifyIndex] = useState(-1);
+class Home extends Component<Props> {
+  state = {
+    showAddModal: false,
+    isModify: false,
+    showDetailsModal: false,
+    showAddPlayerModal: false,
+    modifyIndex: -1,
+  };
 
-  const currentUser = false;
-  return (
-    <div className="page home">
-      <List list={list} />
-      <div className="btn-wrap">
-        <Button
-          type="primary"
-          onClick={() => {
-            setShowAddPlayerModal(true);
+  render() {
+    return (
+      <div className="page home">
+        <List list={this.props.list} winTimes={this.props.winTimes} />
+        <div className="btn-wrap">
+          <Button
+            type="primary"
+            onClick={() => {
+              this.setState({
+                showAddPlayerModal: true,
+              });
+            }}
+          >
+            添加选手
+          </Button>
+          <Button
+            type="primary"
+            onClick={() => {
+              this.setState({
+                isModify: false,
+                showDetailsModal: true,
+              });
+            }}
+          >
+            明细
+          </Button>
+          <Button
+            type="primary"
+            onClick={() => {
+              this.setState({
+                showAddModal: true,
+              });
+            }}
+          >
+            增加记录
+          </Button>
+        </div>
+        <AddRoundModal
+          visible={this.state.showAddModal}
+          onOk={() => {
+            this.setState({
+              showAddModal: false,
+            });
+            this.props.onAddDone();
           }}
-        >
-          添加选手
-        </Button>
-        <Button
-          type="primary"
-          onClick={() => {
-            setIsModify(false);
-            setShowDetailsModal(true);
+          onCancel={() => {
+            this.setState({
+              showAddModal: false,
+            });
           }}
-        >
-          明细
-        </Button>
-        <Button
-          type="primary"
-          onClick={() => {
-            setShowAddModal(true);
+          isModify={this.state.isModify}
+          roundIndex={this.state.modifyIndex}
+        ></AddRoundModal>
+        <DetailsModal
+          visible={this.state.showDetailsModal}
+          onOk={() => {
+            this.setState({
+              showDetailsModal: false,
+            });
           }}
-        >
-          增加记录
-        </Button>
+          onCancel={() => {
+            this.setState({
+              showDetailsModal: false,
+            });
+          }}
+          onModify={(index) => {
+            this.setState({
+              modifyIndex: index,
+              isModify: true,
+              showDetailsModal: false,
+              showAddModal: true,
+            });
+          }}
+        />
+        <AddPlayerModal
+          visible={this.state.showAddPlayerModal}
+          onOk={() => {
+            this.setState({
+              showAddPlayerModal: false,
+            });
+          }}
+          onCancel={() => {
+            this.setState({
+              showAddPlayerModal: false,
+            });
+          }}
+        />
       </div>
-      <AddRoundModal
-        visible={showAddModal}
-        onOk={() => {
-          setShowAddModal(false);
-          onAddDone();
-        }}
-        onCancel={() => {
-          setShowAddModal(false);
-        }}
-        isModify={isModify}
-        roundIndex={modifyIndex}
-      ></AddRoundModal>
-      <DetailsModal
-        visible={showDetailsModal}
-        onOk={() => {
-          setShowDetailsModal(false);
-        }}
-        onCancel={() => {
-          setShowDetailsModal(false);
-        }}
-        onModify={(index) => {
-          setModifyIndex(index);
-          setIsModify(true);
-          setShowDetailsModal(false);
-          setShowAddModal(true);
-        }}
-      />
-      <AddPlayerModal
-        visible={showAddPlayerModal}
-        onOk={() => {
-          setShowAddPlayerModal(false);
-        }}
-        onCancel={() => {
-          setShowAddPlayerModal(false);
-        }}
-      />
-    </div>
-  );
+    );
+  }
 }
+
+const mapStateToProps = (state: StoreType) => {
+  return {
+    winTimes: state.winTimes,
+  };
+};
+
+export default connect(mapStateToProps)(Home);

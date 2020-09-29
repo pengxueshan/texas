@@ -1,14 +1,21 @@
-import React, { useContext, useEffect } from 'react';
+import React, { Component } from 'react';
 import { Modal, Table } from 'antd';
-import AppContext from '../../store/context';
-import { RoundDetails } from '../../utils/types';
+import { RoundDetails, Player } from '../../utils/types';
 import { getRoundDetails } from '../../api/round';
+import { connect } from 'react-redux';
+import { setRoundDetails, setWinTimes } from '../../store/action';
+import { StoreType } from '../../store/reducer';
+import formatWinTimes from '../../utils/win-times';
 
 interface Props {
   onModify: OnModifyFunc;
   visible: boolean;
   onOk: EmptyFunc;
   onCancel: EmptyFunc;
+  setRoundDetails: Function;
+  setWinTimes: Function;
+  players: [Player];
+  roundDetails: [RoundDetails];
 }
 
 interface OnModifyFunc {
@@ -19,21 +26,18 @@ interface EmptyFunc {
   (): void;
 }
 
-export default function DetailsModal({
-  visible,
-  onModify,
-  onOk,
-  onCancel,
-}: Props) {
-  const context = useContext(AppContext);
+class DetailsModal extends Component<Props> {
+  componentDidMount() {
+    this.getRoundDetails();
+  }
 
-  useEffect(() => {
-    getRoundDetails().then((list) => {
-      context.setRoundDetails(list);
-    });
-  }, []);
+  getRoundDetails = async () => {
+    const rounds: [RoundDetails] = await getRoundDetails();
+    this.props.setRoundDetails(rounds);
+    this.props.setWinTimes(formatWinTimes(rounds));
+  };
 
-  function getTableColumns() {
+  getTableColumns() {
     let ret: object[] = [
       {
         title: '场次',
@@ -60,7 +64,7 @@ export default function DetailsModal({
         },
       },
     ];
-    let players = context.players;
+    let players = this.props.players;
     ret = ret.concat(
       players.map((player) => {
         return {
@@ -68,7 +72,7 @@ export default function DetailsModal({
           key: player.id,
           ellipsis: true,
           render: (text: string, record: RoundDetails, index: number) => {
-            return getRoundInfo(player.id, index);
+            return this.getRoundInfo(player.id, index);
           },
         };
       })
@@ -81,7 +85,7 @@ export default function DetailsModal({
         render: (text: string, record: RoundDetails, index: number) => {
           return (
             <div className="details-opt">
-              <span onClick={() => handleModifyClick(index)}>修改</span>
+              <span onClick={() => this.handleModifyClick(index)}>修改</span>
             </div>
           );
         },
@@ -90,26 +94,47 @@ export default function DetailsModal({
     return ret;
   }
 
-  function handleModifyClick(index: number) {
-    onModify(index);
+  handleModifyClick(index: number) {
+    this.props.onModify(index);
   }
 
-  function getRoundInfo(playerId: number, index: number) {
-    const { players } = context.roundDetails[index];
+  getRoundInfo(playerId: number, index: number) {
+    const { players } = this.props.roundDetails[index];
     const p = players.find((info) => info.playerId === playerId);
     return (p && p.amount) || '';
   }
 
-  return (
-    <Modal visible={visible} onCancel={onCancel} onOk={onOk} width={1200}>
-      <div className="details-round-wrap">
-        <Table
-          dataSource={context.roundDetails}
-          columns={getTableColumns()}
-          pagination={false}
-          scroll={{ x: true }}
-        />
-      </div>
-    </Modal>
-  );
+  render() {
+    return (
+      <Modal
+        visible={this.props.visible}
+        onCancel={this.props.onCancel}
+        onOk={this.props.onOk}
+        width={1200}
+      >
+        <div className="details-round-wrap">
+          <Table
+            dataSource={this.props.roundDetails}
+            columns={this.getTableColumns()}
+            pagination={false}
+            scroll={{ x: true }}
+          />
+        </div>
+      </Modal>
+    );
+  }
 }
+
+const mapStateToProps = (state: StoreType) => {
+  return {
+    roundDetails: state.roundDetails,
+    players: state.players,
+  };
+};
+
+const mapDispatchToProps = {
+  setRoundDetails,
+  setWinTimes
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(DetailsModal);

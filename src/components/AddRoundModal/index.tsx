@@ -1,9 +1,10 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { Component } from 'react';
 import { Modal, InputNumber, DatePicker, Table, message } from 'antd';
-import AppContext from '../../store/context';
 import moment from 'moment';
-import { Player } from '../../utils/types';
+import { Player, RoundDetails } from '../../utils/types';
 import { addRound, updateRound } from '../../api/round';
+import { connect } from 'react-redux';
+import { StoreType } from '../../store/reducer';
 
 export interface Props {
   isModify?: boolean;
@@ -11,6 +12,9 @@ export interface Props {
   onOk: Function;
   visible: boolean;
   onCancel: Function;
+  rounds: [];
+  roundDetails: [RoundDetails];
+  players: [Player];
 }
 
 interface AmountMap {
@@ -18,105 +22,112 @@ interface AmountMap {
   [index: number]: any;
 }
 
-export default function AddRoundModal({
-  isModify = false,
-  roundIndex = 0,
-  visible,
-  onOk,
-  onCancel,
-}: Props) {
-  const context = useContext(AppContext);
-  let { rounds } = context;
-  const [list, setList] = useState([{ roundNO: rounds.length + 1 }]);
-  const [dateTime, setDateTime] = useState('');
-  const [leverage, setLeverage] = useState(0.1);
-  const [userAmount, setUserAmount] = useState<AmountMap>({});
+class AddRoundModal extends Component<Props> {
+  state: AmountMap = {
+    list: [{ roundNO: this.props.roundIndex || this.props.rounds.length + 1 }],
+    dateTime: '',
+    leverage: 0.1,
+    userAmount: {},
+  };
 
-  useEffect(() => {
-    if (isModify) {
-      const info = context.roundDetails[roundIndex];
-      let amount: AmountMap = {};
-      if (info.players) {
-        info.players.forEach((item) => {
-          amount[item.playerId] = item.amount;
-        });
-      }
-      setList([{ roundNO: roundIndex + 1 }]);
-      setLeverage(info.leverage);
-      setDateTime(info.date);
-      setUserAmount(amount);
+  componentDidUpdate(prevProps: Props) {
+    if (
+      prevProps.isModify === this.props.isModify &&
+      prevProps.roundIndex === this.props.roundIndex
+    )
+      return;
+    if (this.props.isModify && this.props.roundIndex !== undefined) {
+      const modifyData = this.props.roundDetails[this.props.roundIndex];
+      const tmp: AmountMap = {};
+      modifyData.players.forEach((player) => {
+        tmp[player.playerId] = player.amount;
+      });
+      this.setState({
+        userAmount: tmp,
+        list: [{ roundNO: this.props.roundIndex + 1 }],
+        leverage: modifyData.leverage,
+        dateTime: modifyData.date,
+      });
     }
-  }, [isModify, roundIndex, rounds]);
+  }
 
-  function handleOk() {
-    if (isModify) {
-      const info = context.roundDetails[roundIndex];
+  handleOk = () => {
+    if (this.props.isModify && this.props.roundIndex !== undefined) {
+      const info = this.props.roundDetails[this.props.roundIndex];
       const updateDatas = {
         id: info.id,
-        date: dateTime,
-        leverage: leverage,
-        players: Object.keys(userAmount).map((playerId) => {
+        date: this.state.dateTime,
+        leverage: this.state.leverage,
+        players: Object.keys(this.state.userAmount).map((playerId) => {
           return {
-            amount: userAmount[playerId],
+            amount: this.state.userAmount[playerId],
             playerId,
           };
         }),
       };
       updateRound(updateDatas)
         .then(() => {
-          if (onOk) {
-            onOk();
+          if (this.props.onOk) {
+            this.props.onOk();
           }
         })
         .catch((e) => {
           message.error(e.message);
         });
     } else {
-      const datas = Object.keys(userAmount).map((playerId) => {
+      const datas = Object.keys(this.state.userAmount).map((playerId) => {
         return {
           id: playerId,
-          amount: userAmount[playerId],
+          amount: this.state.userAmount[playerId],
         };
       });
       const params = {
-        date: dateTime,
-        leverage,
+        date: this.state.dateTime,
+        leverage: this.state.leverage,
         playerInfo: datas,
       };
       addRound(params)
         .then(() => {
-          if (onOk) {
-            onOk();
+          if (this.props.onOk) {
+            this.props.onOk();
           }
         })
         .catch((e) => {
           message.error(e.message);
         });
     }
-  }
+  };
 
-  function handleDateTimeChange(v: moment.Moment | null) {
+  handleDateTimeChange(v: moment.Moment | null) {
     if (v) {
-      setDateTime(v.format('YYYY/MM/DD'));
+      this.setState({
+        dateTime: v.format('YYYY/MM/DD'),
+      });
     } else {
-      setDateTime('');
+      this.setState({
+        dateTime: '',
+      });
     }
   }
 
-  function handleLeverageChange(v: number | undefined) {
-    setLeverage(v || 0.1);
+  handleLeverageChange(v: number | undefined) {
+    this.setState({
+      leverage: v || 0.1,
+    });
   }
 
-  function handleAmountChange(v: number | undefined, player: Player) {
+  handleAmountChange(v: number | undefined, player: Player) {
     v = v ? +v : 0;
     let tmp = {
-      ...userAmount,
+      ...this.state.userAmount,
     };
     tmp[player.id] = v;
-    setUserAmount(tmp);
+    this.setState({
+      userAmount: tmp,
+    });
   }
 
-  function getTableColumns() {
+  getTableColumns() {
     let ret = [
       { title: '场次', key: 'roundNO', dataIndex: 'roundNO', ellipsis: true },
       {
@@ -127,10 +138,12 @@ export default function AddRoundModal({
           return (
             <div style={{ width: '150px' }}>
               <DatePicker
-                onChange={handleDateTimeChange}
+                onChange={this.handleDateTimeChange}
                 format="YYYY/MM/DD"
                 value={
-                  (dateTime && moment(dateTime, 'YYYY/MM/DD')) || undefined
+                  (this.state.dateTime &&
+                    moment(this.state.dateTime, 'YYYY/MM/DD')) ||
+                  undefined
                 }
               />
             </div>
@@ -143,13 +156,16 @@ export default function AddRoundModal({
         ellipsis: true,
         render: () => {
           return (
-            <InputNumber onChange={handleLeverageChange} value={leverage} />
+            <InputNumber
+              onChange={this.handleLeverageChange}
+              value={this.state.leverage}
+            />
           );
         },
       },
     ];
     return ret.concat(
-      context.players.map((player: Player) => {
+      this.props.players.map((player: Player) => {
         return {
           title: player.name,
           key: `${player.id}`,
@@ -157,8 +173,8 @@ export default function AddRoundModal({
           render: () => {
             return (
               <InputNumber
-                onChange={(v) => handleAmountChange(v, player)}
-                value={userAmount[player.id]}
+                onChange={(v) => this.handleAmountChange(v, player)}
+                value={this.state.userAmount[player.id]}
               />
             );
           },
@@ -167,29 +183,45 @@ export default function AddRoundModal({
     );
   }
 
-  function handleCancel() {
-    // setList([{ roundNO: 1 }]);
-    // setDateTime('');
-    // setLeverage(0.1);
-    // setUserAmount({});
-    onCancel();
-  }
+  handleCancel = () => {
+    this.setState({
+      list: [
+        { roundNO: this.props.rounds.length + 1 },
+      ],
+      dateTime: '',
+      leverage: 0.1,
+      userAmount: {},
+    });
+    this.props.onCancel();
+  };
 
-  return (
-    <Modal
-      visible={visible}
-      onCancel={handleCancel}
-      onOk={handleOk}
-      width={1200}
-    >
-      <div className="add-round-wrap">
-        <Table
-          dataSource={list}
-          columns={getTableColumns()}
-          pagination={false}
-          scroll={{ x: true }}
-        />
-      </div>
-    </Modal>
-  );
+  render() {
+    return (
+      <Modal
+        visible={this.props.visible}
+        onCancel={this.handleCancel}
+        onOk={this.handleOk}
+        width={1200}
+      >
+        <div className="add-round-wrap">
+          <Table
+            dataSource={this.state.list}
+            columns={this.getTableColumns()}
+            pagination={false}
+            scroll={{ x: true }}
+          />
+        </div>
+      </Modal>
+    );
+  }
 }
+
+const mapStateToProps = (store: StoreType) => {
+  return {
+    rounds: store.rounds,
+    roundDetails: store.roundDetails,
+    players: store.players,
+  };
+};
+
+export default connect(mapStateToProps)(AddRoundModal);

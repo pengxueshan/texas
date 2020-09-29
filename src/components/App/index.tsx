@@ -1,14 +1,20 @@
 import React, { Component, lazy, Suspense } from 'react';
-import AppContext, { ContextType } from '../../store/context';
 import TopBar from '../TopBar';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import PrivateRoute from '../PrivateRoute';
 import { Spin } from 'antd';
+import { connect } from 'react-redux';
 
 import { Player, Round, RankListData, RoundDetails } from '../../utils/types';
 import { getPlayers } from '../../api/player';
 import { getRankList, getRounds, getRoundDetails } from '../../api/round';
-
+import {
+  setPlayers,
+  setRounds,
+  setRoundDetails,
+  setWinTimes,
+} from '../../store/action';
+import formatWinTimes from '../../utils/win-times';
 import './app.scss';
 import 'antd/dist/antd.css';
 
@@ -19,75 +25,37 @@ const Home = lazy(() => import('../../pages/Home'));
 // const Photo = lazy(() => import('../../pages/Photo'));
 const Encrypt = lazy(() => import('../../pages/Encrypt'));
 
-interface State extends ContextType {
+interface State {
   list: [];
 }
 
-interface Map {
-  [key: string]: RankListData;
+interface Props {
+  setPlayers: Function;
+  setRounds: Function;
+  setRoundDetails: Function;
+  setWinTimes: Function;
 }
 
-export default class App extends Component {
-  setPlayers = (list: Player[]) => {
-    this.setState({
-      players: list,
-    });
-  };
-
-  setRounds = (list: Round[]) => {
-    this.setState({
-      rounds: list,
-    });
-  };
-
-  setShowSession = (isShow?: boolean) => {
-    this.setState({
-      showSession: !!isShow,
-    });
-  };
-
-  setIsAuthenticated = (isAuth: boolean) => {
-    this.setState({
-      isAuthenticated: isAuth,
-    });
+class App extends Component<Props> {
+  state: State = {
+    list: [],
   };
 
   getPlayers = async () => {
     const players = await getPlayers();
-    this.setPlayers(players);
+    this.props.setPlayers(players);
   };
 
   getRounds = async () => {
     const rounds = await getRounds();
-    this.setRounds(rounds);
+    this.props.setRounds(rounds);
   };
 
   getRoundDetails = async () => {
-    const rounds = await getRoundDetails();
-    this.setRoundDetails(rounds);
-  };
-
-  setRoundDetails = (list: RoundDetails) => {
-    this.setState({
-      roundDetails: list,
-    });
-  };
-
-  state: State = {
-    players: [],
-    rounds: [],
-    roundDetails: [],
-    showSession: false,
-    isAuthenticated: false,
-    setPlayers: this.setPlayers,
-    setRounds: this.setRounds,
-    setRoundDetails: this.setRoundDetails,
-    setShowSession: this.setShowSession,
-    setIsAuthenticated: this.setIsAuthenticated,
-    getPlayers: this.getPlayers,
-    getRounds: this.getRounds,
-
-    list: [],
+    const rounds: [RoundDetails] = await getRoundDetails();
+    this.props.setRoundDetails(rounds);
+    const times = formatWinTimes(rounds);
+    this.props.setWinTimes(times);
   };
 
   componentDidMount() {
@@ -111,58 +79,28 @@ export default class App extends Component {
   };
 
   render() {
-    let {
-      players,
-      rounds,
-      roundDetails,
-      showSession,
-      setPlayers,
-      setRounds,
-      setRoundDetails,
-      setShowSession,
-      list,
-      isAuthenticated,
-      setIsAuthenticated,
-      getPlayers,
-      getRounds,
-    } = this.state;
+    let { list } = this.state;
     const isDev = process.env.NODE_ENV === 'development';
     return (
       <div className="app">
-        <AppContext.Provider
-          value={{
-            players,
-            rounds,
-            roundDetails,
-            showSession,
-            setPlayers,
-            setRounds,
-            setRoundDetails,
-            setShowSession,
-            isAuthenticated,
-            setIsAuthenticated,
-            getPlayers,
-            getRounds,
-          }}
-        >
-          <Router>
-            {/* {isAuthenticated || isDev ? <TopBar /> : null} */}
-            <TopBar />
-            <Suspense
-              fallback={
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Spin />
-                </div>
-              }
-            >
-              <Switch>
-                {/* <PrivateRoute path="/photo">
+        <Router>
+          {/* {isAuthenticated || isDev ? <TopBar /> : null} */}
+          <TopBar />
+          <Suspense
+            fallback={
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <Spin />
+              </div>
+            }
+          >
+            <Switch>
+              {/* <PrivateRoute path="/photo">
                   <Photo />
                 </PrivateRoute>
                 <PrivateRoute path="/message">
@@ -171,23 +109,35 @@ export default class App extends Component {
                 <PrivateRoute path="/profile">
                   <Profile />
                 </PrivateRoute> */}
-                <Route path="/encrypt">
-                  <Encrypt />
-                </Route>
-                {/* <Route path="/auth">
+              <Route path="/encrypt">
+                <Encrypt />
+              </Route>
+              {/* <Route path="/auth">
                   <Auth />
                 </Route> */}
-                {/* <PrivateRoute path="/">
+              {/* <PrivateRoute path="/">
                   <Home list={list} onAddDone={this.handleAddDone} />
                 </PrivateRoute> */}
-                <Route path="/">
-                  <Home list={list} onAddDone={this.handleAddDone} />
-                </Route>
-              </Switch>
-            </Suspense>
-          </Router>
-        </AppContext.Provider>
+              <Route path="/">
+                <Home list={list} onAddDone={this.handleAddDone} />
+              </Route>
+            </Switch>
+          </Suspense>
+        </Router>
       </div>
     );
   }
 }
+
+const mapStateToProps = () => {
+  return {};
+};
+
+const mapDispatchToProps = {
+  setPlayers,
+  setRounds,
+  setRoundDetails,
+  setWinTimes,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);

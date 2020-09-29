@@ -5,13 +5,15 @@ import App from './components/App';
 import * as serviceWorker from './serviceWorker';
 import zhCN from 'antd/es/locale/zh_CN';
 import { ConfigProvider } from 'antd';
+import { Provider } from 'react-redux';
+import store from './store';
 
 ReactDOM.render(
-  <React.StrictMode>
-    <ConfigProvider locale={zhCN}>
+  <ConfigProvider locale={zhCN}>
+    <Provider store={store}>
       <App />
-    </ConfigProvider>
-  </React.StrictMode>,
+    </Provider>
+  </ConfigProvider>,
   document.getElementById('root')
 );
 

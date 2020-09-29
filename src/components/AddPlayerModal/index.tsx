@@ -1,64 +1,95 @@
-import React, { useState, ChangeEvent, useContext } from 'react';
+import React, { Component, ChangeEvent } from 'react';
 import { Modal, Input, message } from 'antd';
-import { addPlayer } from '../../api/player';
-import AppContext from '../../store/context';
+import { addPlayer, getPlayers } from '../../api/player';
+import { connect } from 'react-redux';
+import { setPlayers } from '../../store/action';
 
 interface Props {
   visible: boolean;
   onOk: Function;
   onCancel: Function;
+  setPlayers: Function;
 }
 
-export default function AddPlayerModal({ visible, onOk, onCancel }: Props) {
-  const context = useContext(AppContext);
-  
-  const [confirmLoading, setConfirmLoading] = useState(false);
-  const [name, setName] = useState('');
+class AddPlayerModal extends Component<Props> {
+  state = {
+    confirmLoading: false,
+    playerName: '',
+  };
 
-  function handleOk() {
-    if (!name) {
+  getPlayers = async () => {
+    const players = await getPlayers();
+    this.props.setPlayers(players);
+  };
+
+  handleOk = () => {
+    if (!this.state.playerName) {
       return message.error('请输入姓名');
     }
-    setConfirmLoading(true);
+    this.setState({
+      confirmLoading: true,
+    });
     addPlayer({
-      name,
+      name: this.state.playerName,
     })
       .then(() => {
-        setConfirmLoading(false);
-        context.getPlayers();
-        if (onOk) {
-          onOk();
+        this.setState({
+          confirmLoading: false,
+        });
+        this.getPlayers();
+        if (this.props.onOk) {
+          this.props.onOk();
         }
       })
       .catch((error) => {
-        setConfirmLoading(false);
+        this.setState({
+          confirmLoading: false,
+        });
         error && message.error(error.message);
       });
-  }
+  };
 
-  function handleCancel() {
-    if (onCancel) {
-      onCancel();
+  handleCancel = () => {
+    if (this.props.onCancel) {
+      this.props.onCancel();
     }
-  }
+  };
 
-  function handleNameChange(e: ChangeEvent<HTMLInputElement>) {
-    setName(e.target.value);
-  }
+  handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
+    this.setState({
+      playerName: e.target.value,
+    });
+  };
 
-  return (
-    <Modal
-      title="添加选手"
-      visible={visible}
-      onOk={handleOk}
-      onCancel={handleCancel}
-      confirmLoading={confirmLoading}
-    >
-      <div className="session">
-        <div className="form-row">
-          <Input placeholder="姓名" value={name} onChange={handleNameChange} />
+  render() {
+    return (
+      <Modal
+        title="添加选手"
+        visible={this.props.visible}
+        onOk={this.handleOk}
+        onCancel={this.handleCancel}
+        confirmLoading={this.state.confirmLoading}
+      >
+        <div className="session">
+          <div className="form-row">
+            <Input
+              placeholder="姓名"
+              value={this.state.playerName}
+              onChange={this.handleNameChange}
+            />
+          </div>
         </div>
-      </div>
-    </Modal>
-  );
+      </Modal>
+    );
+  }
 }
+
+const mapStateToProps = () => {
+  return {};
+};
+
+const mapDispatchToProps = {
+  setPlayers,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(AddPlayerModal);

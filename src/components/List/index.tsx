@@ -1,16 +1,15 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Table, Avatar } from 'antd';
-import AppContext from '../../store/context';
 import { UserOutlined } from '@ant-design/icons';
-import { RankListData } from '../../utils/types';
+import { RankListData, Player, WinTimes } from '../../utils/types';
 import './list.scss';
 
 interface Props {
   list: Array<RankListData>;
+  winTimes: WinTimes;
 }
 
-export default function List({ list }: Props) {
-  const context = useContext(AppContext);
+export default function List({ list, winTimes }: Props) {
   const columns = [
     {
       title: '排名',
@@ -63,11 +62,26 @@ export default function List({ list }: Props) {
       title: '累计盈亏金额',
       key: 'totalBalance',
       dataIndex: 'totalBalance',
-      sorter: (a: RankListData, b: RankListData) => a.totalBalance - b.totalBalance,
+      sorter: (a: RankListData, b: RankListData) =>
+        a.totalBalance - b.totalBalance,
+    },
+    {
+      title: '胜率',
+      key: 'winRate',
+      render: (text: string, record: RankListData) => {
+        const player: Player = record.player;
+        const num = record.playNum;
+        return getWinRate(player.id, num);
+      },
     },
     { title: '当前赔率', key: 'currentLeverage', dataIndex: 'currentLeverage' },
     { title: '操作', key: 'opt', dataIndex: 'opt' },
   ];
+
+  function getWinRate(playerId: number, num: number) {
+    if (!winTimes[playerId] || !num) return 0;
+    return (winTimes[playerId] / num).toFixed(2);
+  }
 
   return (
     <div className="rank-wrap">

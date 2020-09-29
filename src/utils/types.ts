@@ -30,3 +30,7 @@ export interface RoundPlayerInfo {
 export interface RoundDetails extends Round {
   players: RoundPlayerInfo[];
 }
+
+export interface WinTimes {
+  [index: number]: number;
+}
