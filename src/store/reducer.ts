@@ -15,6 +15,7 @@ export interface StoreType {
   showSession: boolean;
   isAuthenticated: boolean;
   winTimes: WinTimes;
+  isMobile: boolean;
 }
 
 function userInfo(state = null, action: Action) {

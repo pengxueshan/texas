@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Button } from 'antd';
 import List from '../components/List';
+import MobileList from '../components/List/mobile';
 import AddRoundModal from '../components/AddRoundModal';
 import DetailsModal from '../components/DetailsModal';
 import AddPlayerModal from '../components/AddPlayerModal';
@@ -17,6 +18,7 @@ interface Props {
   list: [];
   winTimes: WinTimes;
   isAuthenticated: boolean;
+  isMobile: boolean;
 }
 
 class Home extends Component<Props> {
@@ -70,10 +72,20 @@ class Home extends Component<Props> {
     }
   }
 
+  renderList() {
+    if (this.props.isMobile) {
+      return (
+        <MobileList list={this.props.list} winTimes={this.props.winTimes} />
+      );
+    } else {
+      return <List list={this.props.list} winTimes={this.props.winTimes} />;
+    }
+  }
+
   render() {
     return (
       <div className="page home">
-        <List list={this.props.list} winTimes={this.props.winTimes} />
+        {this.renderList()}
         {this.renderButtons()}
         <AddRoundModal
           visible={this.state.showAddModal}
@@ -134,6 +146,7 @@ const mapStateToProps = (state: StoreType) => {
   return {
     winTimes: state.winTimes,
     isAuthenticated: state.isAuthenticated,
+    isMobile: state.isMobile,
   };
 };
 

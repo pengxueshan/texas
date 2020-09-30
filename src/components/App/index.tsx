@@ -64,6 +64,7 @@ class App extends Component<Props> {
     this.getPlayers();
     this.getRounds();
     this.getRankList();
+    this.handleResize();
   }
 
   getRankList = () => {
@@ -78,6 +79,14 @@ class App extends Component<Props> {
     this.getRankList();
     this.getRounds();
     this.getRoundDetails();
+  };
+
+  handleResize = () => {
+    if (document.documentElement.clientWidth < 500) {
+      this.props.setIsMobile(true);
+    } else {
+      this.props.setIsMobile(false);
+    }
   };
 
   render() {

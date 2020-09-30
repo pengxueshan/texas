@@ -1,1 +1,0 @@
-{"version":3,"sources":["list.scss"],"names":[],"mappings":"AAAA,wBAEI,YAAa,CACb,kBAAmB,CAHvB,wBAMI,gBAAiB","file":"6.37a68fb0.chunk.css","sourcesContent":[".rank-wrap {\n  .player-wrap {\n    display: flex;\n    align-items: center;\n  }\n  .avatar-wrap {\n    margin-right: 8px;\n  }\n}"]}

@@ -1,0 +1,27 @@
+.mobile-list {
+  .list-row {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    border-bottom: 1px solid #efefef;
+  }
+  .rank {
+    width: 70px;
+    flex-shrink: 0;
+  }
+  .balance,
+  .win-rate,
+  .name {
+    flex: 1;
+  }
+  .balance,
+  .win-rate {
+    text-align: right;
+  }
+  .list-header {
+    position: sticky;
+    top: 60px;
+    background-color: #fff;
+    font-weight: bold;
+  }
+}
