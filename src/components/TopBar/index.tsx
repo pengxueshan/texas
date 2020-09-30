@@ -1,78 +1,55 @@
-import React, { useContext } from 'react';
-import './top-bar.scss';
+import React, { Component } from 'react';
 import Session from '../Session';
-import AppContext from '../../store/context';
-import { Modal, Avatar } from 'antd';
 import { Link } from 'react-router-dom';
-import { UserOutlined } from '@ant-design/icons';
+import { connect } from 'react-redux';
+import { StoreType } from '../../store/reducer';
+import { setShowSession } from '../../store/action';
+import './top-bar.scss';
 
-export default function TopBar() {
-  const context = useContext(AppContext);
+interface Props {
+  isAuthenticated: boolean;
+  setShowSession: Function;
+}
 
-  function handleSigninClick() {
-    context.setShowSession(true);
-  }
-
-  function handleSignoutClick() {
-    Modal.confirm({
-      title: '确定退出登录吗？',
-      onOk() {
-        // return AV.User.logOut().then(() => {
-        //   window.location.href = '/';
-        // });
-      },
-    });
-  }
-
-  let avatar = '';
-  let currentUser = '';
-
-  const renderAvatar = () => {
-    return (
-      <Link key="setting" to="/profile">
-        {avatar ? (
-          <Avatar size={32} src={avatar} />
-        ) : (
-          <Avatar size={32} icon={<UserOutlined />} />
-        )}
-      </Link>
-    );
+class TopBar extends Component<Props> {
+  handleSigninClick = () => {
+    this.props.setShowSession(true);
   };
 
-  return (
-    <div className="top-bar">
-      <nav>
-        <ul>
-          <li>
-            <Link to="/">排行榜</Link>
-          </li>
-          {/* <li>
-            <Link to="/photo">精彩瞬间</Link>
-          </li>
-          <li>
-            <Link to="/message">聊天室</Link>
-          </li> */}
-        </ul>
-      </nav>
-      <div className="user-section">
-        {!currentUser ? (
-          <span className="link-style" onClick={handleSigninClick}>
-            登录
-          </span>
-        ) : (
-          [
-            renderAvatar(),
-            <span
-              key="logout"
-              className="link-style"
-              onClick={handleSignoutClick}
-            >
-              退出登录
-            </span>,
-          ]
-        )}
-        <Session visible={context.showSession} />
+  render() {
+    const { isAuthenticated } = this.props;
+    return (
+      <div className="top-bar">
+        <nav>
+          <ul>
+            <li>
+              <Link to="/">排行榜</Link>
+            </li>
+          </ul>
+        </nav>
+        <div className="user-section">
+          {!isAuthenticated ? (
+            <span className="link-style" onClick={this.handleSigninClick}>
+              登录
+            </span>
+          ) : (
+            <span>芝麻开门了</span>
+          )}
+          <Session />
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 }
+
+const mapStateToProps = (state: StoreType) => {
+  return {
+    isAuthenticated: state.isAuthenticated,
+  };
+};
+
+const mapDispatchToProps = {
+  setShowSession,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(TopBar);

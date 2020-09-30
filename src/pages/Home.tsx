@@ -16,6 +16,7 @@ interface Props {
   onAddDone: AddDoneFunc;
   list: [];
   winTimes: WinTimes;
+  isAuthenticated: boolean;
 }
 
 class Home extends Component<Props> {
@@ -27,10 +28,11 @@ class Home extends Component<Props> {
     modifyIndex: -1,
   };
 
-  render() {
-    return (
-      <div className="page home">
-        <List list={this.props.list} winTimes={this.props.winTimes} />
+  renderButtons() {
+    if (!this.props.isAuthenticated) {
+      return;
+    } else {
+      return (
         <div className="btn-wrap">
           <Button
             type="primary"
@@ -64,6 +66,15 @@ class Home extends Component<Props> {
             增加记录
           </Button>
         </div>
+      );
+    }
+  }
+
+  render() {
+    return (
+      <div className="page home">
+        <List list={this.props.list} winTimes={this.props.winTimes} />
+        {this.renderButtons()}
         <AddRoundModal
           visible={this.state.showAddModal}
           onOk={() => {
@@ -122,6 +133,7 @@ class Home extends Component<Props> {
 const mapStateToProps = (state: StoreType) => {
   return {
     winTimes: state.winTimes,
+    isAuthenticated: state.isAuthenticated,
   };
 };
 

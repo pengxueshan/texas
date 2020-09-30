@@ -84,7 +84,6 @@ class App extends Component<Props> {
     return (
       <div className="app">
         <Router>
-          {/* {isAuthenticated || isDev ? <TopBar /> : null} */}
           <TopBar />
           <Suspense
             fallback={
