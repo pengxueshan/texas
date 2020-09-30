@@ -1,6 +1,6 @@
 import { types } from './action';
 import { combineReducers } from 'redux';
-import { Player, RoundDetails, WinTimes} from '../utils/types';
+import { Player, RoundDetails, WinTimes } from '../utils/types';
 
 export interface Action {
   type: string;
@@ -87,4 +87,14 @@ function isAuthenticated(state = false, action: Action) {
   }
 }
 
-export default combineReducers({ userInfo, players, rounds, roundDetails, showSession, isAuthenticated, winTimes });
+function isMobile(state = false, action: Action) {
+  switch (action.type) {
+    case types.SET_IS_MOBILE:
+      state = action.payload.isMobile;
+      return state;
+    default:
+      return state;
+  }
+}
+
+export default combineReducers({ userInfo, players, rounds, roundDetails, showSession, isAuthenticated, winTimes, isMobile });

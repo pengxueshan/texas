@@ -5,7 +5,7 @@ import PrivateRoute from '../PrivateRoute';
 import { Spin } from 'antd';
 import { connect } from 'react-redux';
 
-import { Player, Round, RankListData, RoundDetails } from '../../utils/types';
+import { RoundDetails } from '../../utils/types';
 import { getPlayers } from '../../api/player';
 import { getRankList, getRounds, getRoundDetails } from '../../api/round';
 import {
@@ -13,6 +13,7 @@ import {
   setRounds,
   setRoundDetails,
   setWinTimes,
+  setIsMobile,
 } from '../../store/action';
 import formatWinTimes from '../../utils/win-times';
 import './app.scss';
@@ -34,6 +35,7 @@ interface Props {
   setRounds: Function;
   setRoundDetails: Function;
   setWinTimes: Function;
+  setIsMobile: Function;
 }
 
 class App extends Component<Props> {
@@ -137,6 +139,7 @@ const mapDispatchToProps = {
   setRounds,
   setRoundDetails,
   setWinTimes,
+  setIsMobile,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

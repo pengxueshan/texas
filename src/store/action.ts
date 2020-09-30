@@ -5,6 +5,7 @@ const SET_SHOW_SESSION = 'SET_SHOW_SESSION';
 const SET_IS_AUTHENTICATED = 'SET_IS_AUTHENTICATED';
 const SET_ROUND_DETAILS = 'SET_ROUND_DETAILS';
 const SET_WIN_TIMES = 'SET_WIN_TIMES';
+const SET_IS_MOBILE = 'SET_IS_MOBILE';
 
 export interface UserInfo {
   id: number
@@ -73,6 +74,15 @@ export function setIsAuthenticated(isAuthenticated: boolean) {
   };
 }
 
+export function setIsMobile(isMobile: boolean) {
+  return {
+    type: SET_IS_MOBILE,
+    payload: {
+      isMobile,
+    },
+  };
+}
+
 export const types = {
   SET_USER_INFO,
   SET_PLAYERS,
@@ -80,5 +90,6 @@ export const types = {
   SET_SHOW_SESSION,
   SET_IS_AUTHENTICATED,
   SET_ROUND_DETAILS,
-  SET_WIN_TIMES
+  SET_WIN_TIMES,
+  SET_IS_MOBILE
 };
