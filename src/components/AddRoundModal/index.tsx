@@ -24,7 +24,14 @@ interface AmountMap {
 
 class AddRoundModal extends Component<Props> {
   state: AmountMap = {
-    list: [{ roundNO: this.props.roundIndex || this.props.rounds.length + 1 }],
+    list: [
+      {
+        roundNO:
+          this.props.roundIndex && this.props.roundIndex > -1
+            ? this.props.roundIndex
+            : this.props.rounds.length + 1,
+      },
+    ],
     dateTime: '',
     leverage: 0.1,
     userAmount: {},
@@ -98,7 +105,7 @@ class AddRoundModal extends Component<Props> {
     }
   };
 
-  handleDateTimeChange(v: moment.Moment | null) {
+  handleDateTimeChange = (v: moment.Moment | null) => {
     if (v) {
       this.setState({
         dateTime: v.format('YYYY/MM/DD'),
@@ -108,7 +115,7 @@ class AddRoundModal extends Component<Props> {
         dateTime: '',
       });
     }
-  }
+  };
 
   handleLeverageChange(v: number | undefined) {
     this.setState({
@@ -185,9 +192,7 @@ class AddRoundModal extends Component<Props> {
 
   handleCancel = () => {
     this.setState({
-      list: [
-        { roundNO: this.props.rounds.length + 1 },
-      ],
+      list: [{ roundNO: this.props.rounds.length + 1 }],
       dateTime: '',
       leverage: 0.1,
       userAmount: {},
